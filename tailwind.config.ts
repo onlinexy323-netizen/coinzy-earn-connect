@@ -72,7 +72,11 @@ export default {
 			boxShadow: {
 				'card': 'var(--shadow-card)',
 				'card-hover': 'var(--shadow-card-hover)',
-				'premium': 'var(--shadow-premium)'
+				'premium': 'var(--shadow-premium)',
+				'cosmic': 'var(--shadow-cosmic)',
+				'glow-primary': 'var(--glow-primary)',
+				'glow-secondary': 'var(--glow-secondary)',
+				'glow-accent': 'var(--glow-accent)'
 			},
 			keyframes: {
 				'accordion-down': {

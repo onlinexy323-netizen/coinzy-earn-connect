@@ -21,11 +21,11 @@ const LandingPage = () => {
             <span className="text-2xl font-bold text-primary">Coinzy</span>
           </div>
           <div className="flex items-center space-x-4">
-            <Link to="/dashboard">
-              <Button variant="ghost">Sign In</Button>
+            <Link to="/auth">
+              <Button variant="ghost" className="text-foreground hover:text-primary">Sign In</Button>
             </Link>
-            <Link to="/dashboard">
-              <Button variant="hero">Get Started</Button>
+            <Link to="/auth">
+              <Button variant="hero" className="gradient-primary glow-primary">Get Started</Button>
             </Link>
           </div>
         </div>
