@@ -13,13 +13,18 @@ import {
   Eye,
   ArrowUpRight,
   DollarSign,
-  BarChart3
+  BarChart3,
+  Filter
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AgencyCard from './AgencyCard';
+import HeroBanner from './HeroBanner';
+import ProfitabilityInfo from './ProfitabilityInfo';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('agencies');
+  const [categoryFilter, setCategoryFilter] = useState('All Categories');
+  const [sortBy, setSortBy] = useState('Daily Return');
 
   const sidebarItems = [
     { id: 'agencies', label: 'Agency Profiles', icon: Building2 },
@@ -34,66 +39,172 @@ const Dashboard = () => {
       id: 1,
       name: 'FitLife Global',
       category: 'Fitness & Health',
-      description: 'Leading fitness influencer network with global reach',
-      todayReturn: '8.2%',
+      description: 'Leading fitness influencer network with global reach and premium wellness campaigns',
+      todayReturn: '8.2',
       totalSlots: 50,
       availableSlots: 12,
       minInvestment: 100,
       rating: 4.8,
-      performance: '+2.1%'
+      performance: '+2.1%',
+      slotPrice: 999,
+      dailyEarning: 60,
+      isConnected: true
     },
     {
       id: 2,
       name: 'Beauty Trends Int.',
       category: 'Beauty & Lifestyle',
-      description: 'Premium beauty and lifestyle advertising agency',
-      todayReturn: '7.8%',
+      description: 'Premium beauty and lifestyle advertising agency with luxury brand partnerships',
+      todayReturn: '7.8',
       totalSlots: 30,
       availableSlots: 8,
       minInvestment: 150,
       rating: 4.6,
-      performance: '+1.8%'
+      performance: '+1.8%',
+      slotPrice: 499,
+      dailyEarning: 30,
+      isConnected: false
     },
     {
       id: 3,
       name: 'TechVision Agency',
       category: 'Tech & Innovation',
-      description: 'Cutting-edge technology advertising solutions',
-      todayReturn: '9.1%',
+      description: 'Cutting-edge technology advertising solutions for modern digital campaigns',
+      todayReturn: '9.1',
       totalSlots: 40,
       availableSlots: 15,
       minInvestment: 200,
       rating: 4.9,
-      performance: '+3.2%'
+      performance: '+3.2%',
+      slotPrice: 1999,
+      dailyEarning: 140,
+      isConnected: false
+    },
+    {
+      id: 4,
+      name: 'Wellness Pro',
+      category: 'Fitness & Health',
+      description: 'Specialized health and wellness campaigns with medical brand collaborations',
+      todayReturn: '6.8',
+      totalSlots: 25,
+      availableSlots: 5,
+      minInvestment: 100,
+      rating: 4.7,
+      performance: '+1.2%',
+      slotPrice: 499,
+      dailyEarning: 25,
+      isConnected: true
+    },
+    {
+      id: 5,
+      name: 'Glamour Studios',
+      category: 'Beauty & Lifestyle',
+      description: 'High-end beauty campaigns featuring top cosmetic brands and fashion collaborations',
+      todayReturn: '8.9',
+      totalSlots: 35,
+      availableSlots: 18,
+      minInvestment: 180,
+      rating: 4.8,
+      performance: '+2.8%',
+      slotPrice: 1999,
+      dailyEarning: 120,
+      isConnected: false
+    },
+    {
+      id: 6,
+      name: 'Innovation Hub',
+      category: 'Tech & Innovation',
+      description: 'AI and blockchain technology campaigns with startup and enterprise partnerships',
+      todayReturn: '7.2',
+      totalSlots: 20,
+      availableSlots: 3,
+      minInvestment: 250,
+      rating: 4.9,
+      performance: '+1.9%',
+      slotPrice: 999,
+      dailyEarning: 55,
+      isConnected: true
     }
   ];
+
+  const getFilteredAndSortedAgencies = () => {
+    let filtered = mockAgencies;
+    
+    // Filter by category
+    if (categoryFilter !== 'All Categories') {
+      filtered = filtered.filter(agency => agency.category === categoryFilter);
+    }
+    
+    // Sort agencies
+    switch (sortBy) {
+      case 'Daily Return':
+        filtered.sort((a, b) => parseFloat(b.todayReturn) - parseFloat(a.todayReturn));
+        break;
+      case 'Price (Low to High)':
+        filtered.sort((a, b) => a.slotPrice - b.slotPrice);
+        break;
+      case 'Price (High to Low)':
+        filtered.sort((a, b) => b.slotPrice - a.slotPrice);
+        break;
+      case 'Rating':
+        filtered.sort((a, b) => b.rating - a.rating);
+        break;
+      case 'Available Slots':
+        filtered.sort((a, b) => b.availableSlots - a.availableSlots);
+        break;
+      default:
+        break;
+    }
+    
+    return filtered;
+  };
 
   const renderContent = () => {
     switch (activeTab) {
       case 'agencies':
         return (
           <div className="space-y-6">
+            {/* Hero Banner */}
+            <HeroBanner />
+            
+            {/* Profitability Info */}
+            <ProfitabilityInfo />
+            
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-primary">Agency Profiles</h1>
-                <p className="text-muted-foreground">Choose from verified international ad agencies</p>
+                <h1 className="text-3xl font-bold text-primary">Choose Your Agency</h1>
+                <p className="text-muted-foreground">Select a category, book your slot, and start earning daily returns</p>
               </div>
               <div className="flex items-center space-x-4">
-                <select className="px-4 py-2 border border-border rounded-md bg-background">
-                  <option>All Categories</option>
-                  <option>Fitness & Health</option>
-                  <option>Beauty & Lifestyle</option>
-                  <option>Tech & Innovation</option>
-                </select>
-                <select className="px-4 py-2 border border-border rounded-md bg-background">
-                  <option>Sort by Return</option>
-                  <option>Sort by Rating</option>
-                  <option>Sort by Available Slots</option>
+                <div className="flex items-center space-x-2">
+                  <Filter className="w-4 h-4 text-muted-foreground" />
+                  <select 
+                    className="px-4 py-2 border border-border rounded-md bg-background focus:border-primary focus:ring-1 focus:ring-primary"
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                  >
+                    <option>All Categories</option>
+                    <option>Fitness & Health</option>
+                    <option>Beauty & Lifestyle</option>
+                    <option>Tech & Innovation</option>
+                  </select>
+                </div>
+                <select 
+                  className="px-4 py-2 border border-border rounded-md bg-background focus:border-primary focus:ring-1 focus:ring-primary"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                >
+                  <option>Daily Return</option>
+                  <option>Price (Low to High)</option>
+                  <option>Price (High to Low)</option>
+                  <option>Rating</option>
+                  <option>Available Slots</option>
                 </select>
               </div>
             </div>
+            
             <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {mockAgencies.map((agency) => (
+              {getFilteredAndSortedAgencies().map((agency) => (
                 <AgencyCard key={agency.id} agency={agency} />
               ))}
             </div>
