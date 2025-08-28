@@ -152,19 +152,71 @@ const Dashboard = () => {
       case 'agencies':
         return (
           <div className="space-y-6 pb-20">
-            {/* Hero Banner */}
-            <HeroBanner />
+            {/* Modern Finance Hero Section */}
+            <div className="grid lg:grid-cols-3 gap-6 mb-8">
+              <div className="lg:col-span-2">
+                <HeroBanner />
+              </div>
+              <div className="space-y-4">
+                <Card className="gradient-primary text-white shadow-premium">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold">Portfolio Value</h3>
+                      <TrendingUpIcon className="w-5 h-5 animate-pulse" />
+                    </div>
+                    <p className="text-3xl font-bold mb-2">$15,347.50</p>
+                    <p className="text-sm opacity-90 flex items-center">
+                      <TrendingUpIcon className="w-3 h-3 mr-1" />
+                      +12.5% this month
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="gradient-earnings text-white shadow-card-hover">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold">Active Campaigns</h3>
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    </div>
+                    <p className="text-2xl font-bold">8 Running</p>
+                    <p className="text-sm opacity-90">Generating ₹87.32/day</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
             
             {/* Profitability Info */}
             <ProfitabilityInfo />
             
-            <div className="glassmorphism rounded-xl p-6">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-                <div>
-                  <h1 className="text-3xl font-bold gradient-primary bg-clip-text text-transparent mb-2">
-                    Choose Your Agency
-                  </h1>
-                  <p className="text-muted-foreground">Select a category, book your slot, and start earning daily returns</p>
+            <div className="glassmorphism rounded-xl p-8 border border-primary/20">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-6 lg:space-y-0">
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 gradient-primary rounded-lg">
+                      <Users className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h1 className="text-3xl font-bold gradient-primary bg-clip-text text-transparent">
+                        Premium Agency Network
+                      </h1>
+                      <p className="text-muted-foreground">Select your investment category and start earning passive income</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-6 text-sm">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
+                      <span className="text-success font-medium">Live Trading Active</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Star className="w-4 h-4 text-warning" />
+                      <span>4.8/5 Agency Rating</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <DollarSign className="w-4 h-4 text-primary" />
+                      <span>₹2.4M+ Distributed</span>
+                    </div>
+                  </div>
                 </div>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
                   <div className="flex items-center space-x-2">

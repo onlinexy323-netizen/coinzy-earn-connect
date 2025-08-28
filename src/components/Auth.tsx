@@ -9,6 +9,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, ArrowLeft, Mail, Lock, User } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
+import SocialMediaConnect from './SocialMediaConnect';
+import CongratulationEffect from './CongratulationEffect';
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -19,6 +21,9 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [showSocialConnect, setShowSocialConnect] = useState(false);
+  const [showCongratulation, setShowCongratulation] = useState(false);
+  const [connectedPlatform, setConnectedPlatform] = useState<string>('');
   
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -30,8 +35,8 @@ const Auth = () => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        if (session?.user) {
-          navigate('/dashboard');
+        if (session?.user && !showSocialConnect && !showCongratulation) {
+          setShowSocialConnect(true);
         }
       }
     );
@@ -41,8 +46,8 @@ const Auth = () => {
       setSession(session);
       setUser(session?.user ?? null);
       
-      if (session?.user) {
-        navigate('/dashboard');
+      if (session?.user && !showSocialConnect && !showCongratulation) {
+        setShowSocialConnect(true);
       }
     });
 
@@ -133,6 +138,22 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
+  const handleSocialMediaConnect = (platform: string) => {
+    setConnectedPlatform(platform);
+    setShowSocialConnect(false);
+    setShowCongratulation(true);
+  };
+
+  // Show congratulation screen
+  if (showCongratulation) {
+    return <CongratulationEffect platform={connectedPlatform} />;
+  }
+
+  // Show social media connection after successful auth
+  if (showSocialConnect && user) {
+    return <SocialMediaConnect onConnect={handleSocialMediaConnect} />;
+  }
 
   return (
     <div className="min-h-screen gradient-hero flex items-center justify-center p-6">
