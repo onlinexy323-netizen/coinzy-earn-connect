@@ -656,10 +656,37 @@ const Dashboard = () => {
       />
 
       {/* Main Content */}
-      <main className="pt-16 min-h-screen">
-        <div className="container mx-auto px-4 py-6 lg:ml-80 lg:pl-0">
-          {renderContent()}
+      <main className="pt-16 min-h-screen relative overflow-hidden">
+        {/* Cosmic Background Elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-20 right-10 w-96 h-96 gradient-orbital opacity-20 rounded-full blur-3xl animate-float"></div>
+          <div className="absolute bottom-40 left-20 w-80 h-80 gradient-cosmic opacity-15 rounded-full blur-2xl animate-float-delayed"></div>
+          <div className="absolute top-1/2 left-1/2 w-60 h-60 gradient-earnings opacity-10 rounded-full blur-xl animate-pulse"></div>
         </div>
+        
+        {/* Enhanced Container */}
+        <div className="relative z-10 container mx-auto px-4 py-8 lg:ml-80 lg:pl-0 max-w-7xl">
+          <div className="min-h-[calc(100vh-8rem)]">
+            {/* Content Wrapper with Glassmorphism */}
+            <div className="relative">
+              {/* Subtle Grid Pattern */}
+              <div className="absolute inset-0 opacity-5 pointer-events-none" 
+                   style={{
+                     backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--primary)) 1px, transparent 0)`,
+                     backgroundSize: '24px 24px'
+                   }}>
+              </div>
+              
+              {/* Main Content */}
+              <div className="relative z-10 space-y-8">
+                {renderContent()}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Bottom Gradient Fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background via-background/50 to-transparent pointer-events-none"></div>
       </main>
 
       {/* Bottom Navigation */}
