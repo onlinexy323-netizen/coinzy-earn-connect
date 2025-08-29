@@ -8,9 +8,9 @@ interface BottomNavigationProps {
 
 const BottomNavigation: React.FC<BottomNavigationProps> = ({ activeTab, onTabChange }) => {
   const navItems = [
-    { id: 'agencies', label: 'Home', icon: Home },
+    { id: 'home', label: 'Home', icon: Home },
     { id: 'wallet', label: 'Wallet', icon: Wallet },
-    { id: 'earnings', label: 'Earnings', icon: TrendingUp },
+    { id: 'referrals', label: 'Referrals', icon: TrendingUp },
     { id: 'profile', label: 'Profile', icon: User },
   ];
 

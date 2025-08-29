@@ -4,12 +4,20 @@ import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import BottomNavigation from './BottomNavigation';
 import ModernSidebar from './ModernSidebar';
-import WelcomeHeader from './WelcomeHeader';
-import QuickActions from './QuickActions';
-import SlotBookingCard from './SlotBookingCard';
+import CategoryCard from './CategoryCard';
+import WalletOverviewCard from './WalletOverviewCard';
+import CountdownBanner from './CountdownBanner';
+import ReferralCard from './ReferralCard';
+import TodaySummaryCard from './TodaySummaryCard';
 import WalletOverview from './WalletOverview';
 import GrowthChart from './GrowthChart';
 import ActivityFeed from './ActivityFeed';
+
+// Import category images
+import fitnessImage from '@/assets/fitness-category.jpg';
+import techImage from '@/assets/tech-category.jpg';
+import beautyImage from '@/assets/beauty-category.jpg';
+import lifestyleImage from '@/assets/lifestyle-category.jpg';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('home');
@@ -18,17 +26,17 @@ const Dashboard = () => {
   const [bookedAmount, setBookedAmount] = useState<number>(0);
   const { toast } = useToast();
 
+  // Check if slot booking is currently active (6 PM - 8 PM)
+  const isSlotActive = () => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    return currentHour >= 18 && currentHour < 20; // 6 PM to 8 PM
+  };
+
   // Mock user data
   const userData = {
     name: 'Rajesh Kumar',
     avatar: undefined
-  };
-
-  // Mock stats data
-  const statsData = {
-    todayEarning: 245,
-    activeSlots: 2,
-    walletBalance: 12500
   };
 
   // Mock wallet data
@@ -38,6 +46,61 @@ const Dashboard = () => {
     totalWithdrawn: 8000,
     availableBalance: 12500
   };
+
+  // Mock categories data
+  const categories = [
+    {
+      id: 'fitness',
+      name: 'Fitness',
+      image: fitnessImage,
+      returnRate: 4.5,
+      trend: [3.2, 3.8, 4.1, 4.5, 4.3, 4.5, 4.7],
+      isActive: isSlotActive()
+    },
+    {
+      id: 'tech',
+      name: 'Tech',
+      image: techImage,
+      returnRate: 5.2,
+      trend: [4.8, 5.0, 5.1, 5.3, 5.2, 5.4, 5.2],
+      isActive: isSlotActive()
+    },
+    {
+      id: 'beauty',
+      name: 'Beauty',
+      image: beautyImage,
+      returnRate: 3.8,
+      trend: [3.5, 3.6, 3.8, 3.7, 3.9, 3.8, 4.0],
+      isActive: isSlotActive()
+    },
+    {
+      id: 'lifestyle',
+      name: 'Products',
+      image: lifestyleImage,
+      returnRate: 4.1,
+      trend: [3.9, 4.0, 4.1, 4.0, 4.2, 4.1, 4.3],
+      isActive: isSlotActive()
+    }
+  ];
+
+  // Mock referral data
+  const referralData = {
+    referralCode: 'RK2024',
+    referralEarnings: 1250,
+    totalReferrals: 8
+  };
+
+  // Mock today's booked slots
+  const bookedSlots = isSlotBooked ? [
+    {
+      id: '1',
+      category: 'Fitness',
+      amount: bookedAmount,
+      returnRate: 4.5,
+      expectedReturn: Math.round(bookedAmount * 0.045),
+      status: 'active' as const
+    }
+  ] : [];
 
   // Mock chart data
   const chartData = [
@@ -86,12 +149,14 @@ const Dashboard = () => {
     }
   ];
 
-  const handleBookSlot = (amount: number) => {
+  const handleBookSlot = (categoryId: string) => {
+    // For demo, we'll use a fixed amount of ₹1000
+    const amount = 1000;
     setIsSlotBooked(true);
     setBookedAmount(amount);
     toast({
       title: "Slot Booked Successfully! 🎉",
-      description: `Your ₹${amount} slot is now active. Returns will be credited tomorrow at 12 PM.`
+      description: `Your ₹${amount} slot in ${categories.find(c => c.id === categoryId)?.name} is now active. Returns will be credited tomorrow at 12 PM.`
     });
   };
 
@@ -102,38 +167,64 @@ const Dashboard = () => {
     });
   };
 
-  // Check if slot booking is currently active (6 PM - 10 PM)
-  const isSlotActive = () => {
-    const now = new Date();
-    const currentHour = now.getHours();
-    return currentHour >= 18 && currentHour < 22; // 6 PM to 10 PM
+  const handleDeposit = () => {
+    toast({
+      title: "Redirecting to Payment",
+      description: "Opening secure payment gateway..."
+    });
   };
 
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
         return (
-          <div className="space-y-8">
-            <WelcomeHeader user={userData} stats={statsData} />
-            <QuickActions 
-              onBookSlot={() => {}} 
-              onWithdraw={handleWithdraw} 
-              isSlotActive={isSlotActive()} 
+          <div className="space-y-6 pb-20">
+            {/* Welcome Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-bold text-foreground">
+                    Welcome back, {userData.name}! 👋
+                  </h1>
+                  <p className="text-muted-foreground">Ready to boost your earnings today?</p>
+                </div>
+              </div>
+              
+              {/* Countdown Banner */}
+              <CountdownBanner isActive={isSlotActive()} />
+            </div>
+
+            {/* Wallet Overview */}
+            <WalletOverviewCard 
+              balance={walletData.availableBalance}
+              onDeposit={handleDeposit}
+              onWithdraw={handleWithdraw}
             />
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <SlotBookingCard 
-                isBooked={isSlotBooked}
-                bookedAmount={bookedAmount}
-                onBookSlot={handleBookSlot}
-              />
-              <div className="space-y-8">
-                <WalletOverview walletData={walletData} />
+
+            {/* Today's Summary (if user has booked slots) */}
+            <TodaySummaryCard bookedSlots={bookedSlots} />
+
+            {/* Ad Categories Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-foreground">Ad Categories</h2>
+                <div className="text-sm text-muted-foreground">Today's returns</div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {categories.map((category) => (
+                  <CategoryCard
+                    key={category.id}
+                    category={category}
+                    onBookSlot={handleBookSlot}
+                    isNewUser={false} // Set to true for new users to show fixed slots only
+                  />
+                ))}
               </div>
             </div>
-            
-            <GrowthChart data={chartData} />
-            <ActivityFeed activities={activityData} />
+
+            {/* Referral Section */}
+            <ReferralCard {...referralData} />
           </div>
         );
       
@@ -150,25 +241,58 @@ const Dashboard = () => {
           </div>
         );
       
-      case 'earnings':
+      case 'referrals':
         return (
-          <div className="space-y-8">
+          <div className="space-y-8 pb-20">
             <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-foreground">Earnings Overview</h2>
-              <div className="text-2xl font-bold text-green-500">₹{walletData.totalEarnings.toLocaleString()}</div>
+              <h2 className="text-3xl font-bold text-foreground">Referrals</h2>
+              <div className="text-2xl font-bold text-accent">₹{referralData.referralEarnings.toLocaleString()}</div>
             </div>
-            <WelcomeHeader user={userData} stats={statsData} />
-            <GrowthChart data={chartData} />
-            <ActivityFeed activities={activityData.filter(a => a.type === 'earning')} />
+            <ReferralCard {...referralData} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Referral History</h3>
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="p-4 bg-card rounded-lg border border-border/50">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <div className="font-medium">Friend {i} joined</div>
+                          <div className="text-sm text-muted-foreground">{i} days ago</div>
+                        </div>
+                        <div className="text-success font-medium">+₹50</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">How It Works</h3>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-medium">1</div>
+                    <div>Share your referral code with friends</div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <div className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-medium">2</div>
+                    <div>They sign up using your code</div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <div className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-medium">3</div>
+                    <div>You both earn ₹50 bonus + 2% lifetime commission</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         );
       
       case 'profile':
         return (
-          <div className="space-y-8">
+          <div className="space-y-8 pb-20">
             <h2 className="text-3xl font-bold text-foreground">Profile Settings</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="glass-card p-6 rounded-2xl">
+              <div className="p-6 bg-card rounded-2xl border border-border/50 shadow-card">
                 <h3 className="text-xl font-semibold mb-4">Personal Information</h3>
                 <div className="space-y-4">
                   <div>
@@ -186,16 +310,16 @@ const Dashboard = () => {
                 </div>
               </div>
               
-              <div className="glass-card p-6 rounded-2xl">
+              <div className="p-6 bg-card rounded-2xl border border-border/50 shadow-card">
                 <h3 className="text-xl font-semibold mb-4">Account Statistics</h3>
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Total Slots Booked</label>
-                    <div className="mt-1 text-lg font-medium text-blue-500">47</div>
+                    <div className="mt-1 text-lg font-medium text-primary">47</div>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Success Rate</label>
-                    <div className="mt-1 text-lg font-medium text-green-500">96.8%</div>
+                    <div className="mt-1 text-lg font-medium text-success">96.8%</div>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Member Since</label>
@@ -228,14 +352,14 @@ const Dashboard = () => {
             </Button>
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 gradient-primary rounded-xl flex items-center justify-center shadow-premium">
-                <span className="text-white font-bold text-sm">C</span>
+                <span className="text-white font-bold text-sm">S</span>
               </div>
               <div>
                 <h1 className="font-bold text-lg gradient-primary bg-clip-text text-transparent">
-                  Coinzy
+                  SocialSlot
                 </h1>
                 <p className="text-xs text-muted-foreground hidden sm:block">
-                  Finance & Social
+                  Ad Slot Booking
                 </p>
               </div>
             </div>
