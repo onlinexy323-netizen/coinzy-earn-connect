@@ -1,9 +1,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { 
-  Building2, 
+  Home, 
   Wallet, 
-  Calendar, 
   TrendingUp, 
   User, 
   Users,
@@ -26,12 +25,11 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
   onTabChange 
 }) => {
   const sidebarItems = [
-    { id: 'agencies', label: 'Agency Profiles', icon: Building2 },
+    { id: 'home', label: 'Dashboard', icon: Home },
     { id: 'wallet', label: 'Wallet', icon: Wallet },
-    { id: 'booked', label: 'Booked Slots', icon: Calendar },
     { id: 'earnings', label: 'Earnings', icon: TrendingUp },
     { id: 'team', label: 'My Team', icon: Users },
-    { id: 'profile', label: 'Profile Settings', icon: User },
+    { id: 'profile', label: 'Profile', icon: User },
   ];
 
   return (
