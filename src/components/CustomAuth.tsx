@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Eye, EyeOff, Copy, CheckCircle } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Copy, CheckCircle, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface UserCredentials {
   uniqueId: string;
@@ -37,6 +38,8 @@ const CustomAuth = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showCredentials, setShowCredentials] = useState(false);
+  const [showSignupFailure, setShowSignupFailure] = useState(false);
+  const [signupError, setSignupError] = useState("");
   const [userCredentials, setUserCredentials] = useState<UserCredentials | null>(null);
   
   // Form fields
@@ -97,11 +100,8 @@ const CustomAuth = () => {
         throw new Error(response.message);
       }
     } catch (error: any) {
-      toast({
-        title: "Signup Failed",
-        description: error.message,
-        variant: "destructive",
-      });
+      setSignupError(error.message);
+      setShowSignupFailure(true);
     } finally {
       setLoading(false);
     }
@@ -111,7 +111,7 @@ const CustomAuth = () => {
     if (!loginIdentifier || !password) {
       toast({
         title: "Error",
-        description: "Please enter your phone number/User ID and password",
+        description: "Please enter your User ID and password",
         variant: "destructive",
       });
       return;
@@ -249,7 +249,7 @@ const CustomAuth = () => {
             <div className="bg-warning/10 border border-warning/20 p-4 rounded-lg mb-6">
               <p className="text-sm text-warning-foreground">
                 📸 <strong>Important:</strong> Take a screenshot and save these credentials safely. 
-                You can login with either your Unique ID or Phone Number.
+                You can login with your Unique ID and password.
               </p>
             </div>
 
@@ -364,13 +364,13 @@ const CustomAuth = () => {
             ) : (
               <>
                 <div>
-                  <Label htmlFor="loginIdentifier">Phone Number or User ID</Label>
+                  <Label htmlFor="loginIdentifier">User ID</Label>
                   <Input
                     id="loginIdentifier"
                     type="text"
                     value={loginIdentifier}
                     onChange={(e) => setLoginIdentifier(e.target.value)}
-                    placeholder="Enter phone number or unique ID (e.g., SS1001)"
+                    placeholder="Enter your unique ID (e.g., SS1001)"
                     required
                   />
                 </div>
@@ -424,6 +424,29 @@ const CustomAuth = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Signup Failure Dialog */}
+      <Dialog open={showSignupFailure} onOpenChange={setShowSignupFailure}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              <DialogTitle>Signup Failed</DialogTitle>
+            </div>
+            <DialogDescription className="text-left">
+              {signupError}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end">
+            <Button 
+              onClick={() => setShowSignupFailure(false)}
+              variant="premium"
+            >
+              Try Again
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
