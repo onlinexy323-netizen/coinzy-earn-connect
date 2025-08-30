@@ -12,3 +12,19 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+User-agent: *
+Allow: /
+
+Sitemap: https://coinzy-seven.vercel.app/sitemap.xml
+
+User-agent: *
+Allow: /
+
+Sitemap: https://coinzy-seven.vercel.app/auth/sitemap.xml
+
+User-agent: *
+Allow: /
+
+Sitemap: https://coinzy-seven.vercel.app/onboarding/sitemap.xml
+
