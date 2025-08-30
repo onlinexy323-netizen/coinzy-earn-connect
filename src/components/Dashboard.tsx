@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Menu } from 'lucide-react';
+import { Menu, Instagram, Facebook, Youtube, Twitter } from 'lucide-react';
 import BottomNavigation from './BottomNavigation';
 import ModernSidebar from './ModernSidebar';
 import CategoryCard from './CategoryCard';
@@ -12,6 +12,7 @@ import TodaySummaryCard from './TodaySummaryCard';
 import WalletOverview from './WalletOverview';
 import GrowthChart from './GrowthChart';
 import ActivityFeed from './ActivityFeed';
+import { useNavigate } from 'react-router-dom';
 
 // Import category images
 import fitnessImage from '@/assets/fitness-category.jpg';
@@ -24,19 +25,53 @@ const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isSlotBooked, setIsSlotBooked] = useState(false);
   const [bookedAmount, setBookedAmount] = useState<number>(0);
+  const [userData, setUserData] = useState<any>(null);
+  const [connectedAccounts, setConnectedAccounts] = useState<any[]>([]);
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  // Check authentication and load user data
+  useEffect(() => {
+    const storedUser = localStorage.getItem('socialslot_user');
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      setUserData(user);
+      
+      // Load connected social accounts
+      if (user.social_accounts) {
+        setConnectedAccounts(Object.values(user.social_accounts) || []);
+      }
+    } else {
+      // Redirect to auth if not logged in
+      navigate('/auth');
+    }
+  }, [navigate]);
+
+  // Get social platform icon
+  const getSocialIcon = (platform: string) => {
+    switch (platform) {
+      case 'instagram': return <Instagram className="h-5 w-5" />;
+      case 'facebook': return <Facebook className="h-5 w-5" />;
+      case 'youtube': return <Youtube className="h-5 w-5" />;
+      case 'twitter': return <Twitter className="h-5 w-5" />;
+      default: return null;
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('socialslot_user');
+    toast({
+      title: "Logged Out",
+      description: "You have been logged out successfully",
+    });
+    navigate('/auth');
+  };
 
   // Check if slot booking is currently active (6 PM - 8 PM)
   const isSlotActive = () => {
     const now = new Date();
     const currentHour = now.getHours();
     return currentHour >= 18 && currentHour < 20; // 6 PM to 8 PM
-  };
-
-  // Mock user data
-  const userData = {
-    name: 'Rajesh Kumar',
-    avatar: undefined
   };
 
   // Mock wallet data
@@ -182,12 +217,23 @@ const Dashboard = () => {
             {/* Welcome Section */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-2xl font-bold text-foreground">
-                    Welcome back, {userData.name}! 👋
-                  </h1>
-                  <p className="text-muted-foreground">Ready to boost your earnings today?</p>
-                </div>
+                 <div>
+                   <h1 className="text-2xl font-bold text-foreground">
+                     Welcome back, {userData?.full_name || 'User'}! 👋
+                   </h1>
+                   <p className="text-muted-foreground">Ready to boost your earnings today?</p>
+                   {connectedAccounts.length > 0 && (
+                     <div className="flex items-center mt-2 space-x-2">
+                       <span className="text-xs text-muted-foreground">Connected:</span>
+                       {connectedAccounts.slice(0, 3).map((account, index) => (
+                         <div key={index} className="flex items-center space-x-1 text-xs bg-muted/30 px-2 py-1 rounded-full">
+                           {getSocialIcon(account.platform)}
+                           <span className="font-medium">{account.username}</span>
+                         </div>
+                       ))}
+                     </div>
+                   )}
+                 </div>
               </div>
               
               {/* Countdown Banner */}
@@ -294,20 +340,27 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="p-6 bg-card rounded-2xl border border-border/50 shadow-card">
                 <h3 className="text-xl font-semibold mb-4">Personal Information</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Full Name</label>
-                    <div className="mt-1 text-lg font-medium">{userData.name}</div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Email</label>
-                    <div className="mt-1 text-lg font-medium">rajesh@example.com</div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Phone</label>
-                    <div className="mt-1 text-lg font-medium">+91 98765 43210</div>
-                  </div>
-                </div>
+                 <div className="space-y-4">
+                   <div>
+                     <label className="text-sm font-medium text-muted-foreground">Full Name</label>
+                     <div className="mt-1 text-lg font-medium">{userData?.full_name || 'N/A'}</div>
+                   </div>
+                   <div>
+                     <label className="text-sm font-medium text-muted-foreground">Email</label>
+                     <div className="mt-1 text-lg font-medium">{userData?.email || 'Not provided'}</div>
+                   </div>
+                   <div>
+                     <label className="text-sm font-medium text-muted-foreground">Phone</label>
+                     <div className="mt-1 text-lg font-medium">{userData?.phone_number || 'N/A'}</div>
+                   </div>
+                   <div>
+                     <label className="text-sm font-medium text-muted-foreground">User ID</label>
+                     <div className="mt-1 text-lg font-medium text-primary">{userData?.user_id || 'N/A'}</div>
+                   </div>
+                 </div>
+                 <Button onClick={handleLogout} variant="outline" className="w-full mt-4">
+                   Logout
+                 </Button>
               </div>
               
               <div className="p-6 bg-card rounded-2xl border border-border/50 shadow-card">
