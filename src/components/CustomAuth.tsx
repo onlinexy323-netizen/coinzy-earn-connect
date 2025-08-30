@@ -22,6 +22,9 @@ interface SignupResponse {
   profile_id?: string;
   email?: string;
   password?: string;
+  full_name?: string;
+  phone_number?: string;
+  referral_code?: string;
   message: string;
 }
 
@@ -166,14 +169,27 @@ const CustomAuth = () => {
         if (authData.user) {
           console.log("🎉 Auth user created successfully!");
           
-          // Update the profile with the actual auth user ID
-          const { error: updateError } = await supabase
-            .from('profiles')
-            .update({ user_id: authData.user.id })
-            .eq('id', response.profile_id);
+          // Now create the profile with the actual auth user ID
+          console.log("📋 Creating user profile...");
+          const { data: profileData, error: profileError } = await supabase.rpc('create_user_profile', {
+            p_auth_user_id: authData.user.id,
+            p_unique_user_id: response.user_id,
+            p_full_name: response.full_name || fullName,
+            p_phone_number: response.phone_number || phoneNumber,
+            p_email: response.email,
+            p_referral_code: response.referral_code || null
+          });
 
-          if (updateError) {
-            console.error("⚠️ Warning: Failed to update profile user_id:", updateError);
+          console.log("🗂️ Profile creation response:", { profileData, profileError });
+
+          if (profileError) {
+            console.error("⚠️ Profile creation failed:", profileError);
+            // Don't fail completely, just warn
+            toast({
+              title: "Warning",
+              description: "Account created but profile setup incomplete. Please contact support.",
+              variant: "destructive",
+            });
           }
 
           setUserCredentials({

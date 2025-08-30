@@ -67,6 +67,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_user_profile: {
+        Args: {
+          p_auth_user_id: string
+          p_email: string
+          p_full_name: string
+          p_phone_number: string
+          p_referral_code?: string
+          p_unique_user_id: string
+        }
+        Returns: Json
+      }
       generate_unique_user_id: {
         Args: Record<PropertyKey, never>
         Returns: string
