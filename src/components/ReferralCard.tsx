@@ -18,7 +18,7 @@ const ReferralCard: React.FC<ReferralCardProps> = ({
   const { toast } = useToast();
 
   const handleCopyReferralCode = () => {
-    const referralLink = `https://socialslot.app/signup?ref=${referralCode}`;
+    const referralLink = `${window.location.origin}/auth?ref=${referralCode}`;
     navigator.clipboard.writeText(referralLink);
     toast({
       title: "Referral Link Copied! 🎉",

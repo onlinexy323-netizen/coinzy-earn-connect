@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Eye, EyeOff, Copy, CheckCircle, AlertTriangle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface UserCredentials {
@@ -52,6 +52,20 @@ const CustomAuth = () => {
   
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Auto-fill referral code from URL parameters
+  useEffect(() => {
+    const refCode = searchParams.get('ref');
+    if (refCode) {
+      setReferralCode(refCode);
+      setIsSignUp(true); // Ensure we're on signup page
+      toast({
+        title: "Referral Code Applied! 🎉",
+        description: `Using referral code: ${refCode}`,
+      });
+    }
+  }, [searchParams, toast]);
 
   // Simple hash function for passwords (in production, use proper bcrypt)
   const hashPassword = (password: string) => {
@@ -267,68 +281,71 @@ const CustomAuth = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-subtle p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-subtle p-3 sm:p-4">
       <Card className="w-full max-w-md glass-card border-primary/20">
-        <CardContent className="p-8">
-          <div className="flex items-center mb-6">
+        <CardContent className="p-4 sm:p-8">
+          <div className="flex items-center mb-4 sm:mb-6">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate("/")}
-              className="p-2 mr-2"
+              className="p-1.5 sm:p-2 mr-2"
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <div>
-              <h2 className="text-2xl font-bold text-foreground">
+            <div className="flex-1">
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground">
                 {isSignUp ? "Create Account" : "Login"}
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground">
                 {isSignUp ? "Join SocialSlot platform" : "Welcome back to SocialSlot"}
               </p>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             {isSignUp ? (
               <>
-                <div>
-                  <Label htmlFor="fullName">Full Name *</Label>
+                <div className="space-y-1">
+                  <Label htmlFor="fullName" className="text-sm font-medium">Full Name *</Label>
                   <Input
                     id="fullName"
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Enter your full name"
+                    className="h-10 text-base"
                     required
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="phoneNumber">Phone Number *</Label>
+                <div className="space-y-1">
+                  <Label htmlFor="phoneNumber" className="text-sm font-medium">Phone Number *</Label>
                   <Input
                     id="phoneNumber"
                     type="tel"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     placeholder="Enter your phone number"
+                    className="h-10 text-base"
                     required
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="email">Email ID (Optional)</Label>
+                <div className="space-y-1">
+                  <Label htmlFor="email" className="text-sm font-medium">Email ID (Optional)</Label>
                   <Input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
+                    className="h-10 text-base"
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="password">Password *</Label>
+                <div className="space-y-1">
+                  <Label htmlFor="password" className="text-sm font-medium">Password *</Label>
                   <div className="relative">
                     <Input
                       id="password"
@@ -336,13 +353,14 @@ const CustomAuth = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Create a strong password"
+                      className="h-10 text-base pr-10"
                       required
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -350,33 +368,39 @@ const CustomAuth = () => {
                   </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="referralCode">Referral Code (Optional)</Label>
+                <div className="space-y-1">
+                  <Label htmlFor="referralCode" className="text-sm font-medium">Referral Code (Optional)</Label>
                   <Input
                     id="referralCode"
                     type="text"
                     value={referralCode}
                     onChange={(e) => setReferralCode(e.target.value)}
                     placeholder="Enter referral code if you have one"
+                    className="h-10 text-base"
+                    disabled={!!searchParams.get('ref')} // Disable if code came from URL
                   />
+                  {searchParams.get('ref') && (
+                    <p className="text-xs text-success">✓ Referral code applied from invitation link</p>
+                  )}
                 </div>
               </>
             ) : (
               <>
-                <div>
-                  <Label htmlFor="loginIdentifier">User ID</Label>
+                <div className="space-y-1">
+                  <Label htmlFor="loginIdentifier" className="text-sm font-medium">User ID</Label>
                   <Input
                     id="loginIdentifier"
                     type="text"
                     value={loginIdentifier}
                     onChange={(e) => setLoginIdentifier(e.target.value)}
                     placeholder="Enter your unique ID (e.g., SS1001)"
+                    className="h-10 text-base"
                     required
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="loginPassword">Password</Label>
+                <div className="space-y-1">
+                  <Label htmlFor="loginPassword" className="text-sm font-medium">Password</Label>
                   <div className="relative">
                     <Input
                       id="loginPassword"
@@ -384,13 +408,14 @@ const CustomAuth = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter your password"
+                      className="h-10 text-base pr-10"
                       required
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -402,7 +427,7 @@ const CustomAuth = () => {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full h-10 sm:h-11 text-base font-medium"
               variant="premium"
               disabled={loading}
             >
@@ -410,14 +435,14 @@ const CustomAuth = () => {
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-4 sm:mt-6 text-center">
             <p className="text-sm text-muted-foreground">
               {isSignUp ? "Already have an account?" : "Don't have an account?"}
             </p>
             <Button
               variant="link"
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-primary hover:text-primary-light"
+              className="text-primary hover:text-primary-light p-0 h-auto text-sm"
             >
               {isSignUp ? "Login here" : "Create account"}
             </Button>
@@ -427,20 +452,21 @@ const CustomAuth = () => {
 
       {/* Signup Failure Dialog */}
       <Dialog open={showSignupFailure} onOpenChange={setShowSignupFailure}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-sm sm:max-w-md mx-4">
           <DialogHeader>
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
-              <DialogTitle>Signup Failed</DialogTitle>
+              <AlertTriangle className="h-5 w-5 text-destructive flex-shrink-0" />
+              <DialogTitle className="text-base sm:text-lg">Signup Failed</DialogTitle>
             </div>
-            <DialogDescription className="text-left">
+            <DialogDescription className="text-left text-sm sm:text-base mt-2">
               {signupError}
             </DialogDescription>
           </DialogHeader>
-          <div className="flex justify-end">
+          <div className="flex justify-end mt-4">
             <Button 
               onClick={() => setShowSignupFailure(false)}
               variant="premium"
+              className="h-9 sm:h-10 text-sm sm:text-base"
             >
               Try Again
             </Button>
