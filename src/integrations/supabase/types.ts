@@ -79,7 +79,7 @@ export type Database = {
         Args: {
           p_email?: string
           p_full_name: string
-          p_password_hash: string
+          p_password: string
           p_phone_number: string
           p_referral_code?: string
         }

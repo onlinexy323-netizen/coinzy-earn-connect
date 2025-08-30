@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Eye, EyeOff, Copy, CheckCircle, AlertTriangle } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Session, User } from "@supabase/supabase-js";
 
 interface UserCredentials {
   uniqueId: string;
@@ -19,6 +20,8 @@ interface SignupResponse {
   success: boolean;
   user_id?: string;
   profile_id?: string;
+  email?: string;
+  password?: string;
   message: string;
 }
 
@@ -41,6 +44,8 @@ const CustomAuth = () => {
   const [showSignupFailure, setShowSignupFailure] = useState(false);
   const [signupError, setSignupError] = useState("");
   const [userCredentials, setUserCredentials] = useState<UserCredentials | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   
   // Form fields
   const [fullName, setFullName] = useState("");
@@ -53,6 +58,33 @@ const CustomAuth = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  // Set up auth state listener
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log("🔐 Auth state changed:", event, session?.user?.email);
+        setSession(session);
+        setUser(session?.user ?? null);
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Redirect authenticated users
+  useEffect(() => {
+    if (session && user) {
+      console.log("✅ User authenticated, redirecting to dashboard...");
+      navigate('/dashboard');
+    }
+  }, [session, user, navigate]);
 
   // Auto-fill referral code from URL parameters
   useEffect(() => {
@@ -88,41 +120,74 @@ const CustomAuth = () => {
       console.log("🔄 Starting signup process...");
       console.log("📝 Form data:", { fullName, phoneNumber, email, referralCode });
       
-      const hashedPassword = hashPassword(password);
-      console.log("🔒 Password hashed");
-      
+      // First, call our RPC to generate user details
       console.log("📡 Calling handle_custom_signup RPC...");
-      const { data, error } = await supabase.rpc('handle_custom_signup', {
+      const { data: rpcData, error: rpcError } = await supabase.rpc('handle_custom_signup', {
         p_full_name: fullName,
         p_phone_number: phoneNumber,
-        p_password_hash: hashedPassword,
+        p_password: password,
         p_email: email || null,
         p_referral_code: referralCode || null
       });
 
-      console.log("📨 RPC Response:", { data, error });
+      console.log("📨 RPC Response:", { rpcData, rpcError });
 
-      if (error) {
-        console.error("❌ RPC Error:", error);
-        throw error;
+      if (rpcError) {
+        console.error("❌ RPC Error:", rpcError);
+        throw rpcError;
       }
 
-      const response = data as unknown as SignupResponse;
+      const response = rpcData as unknown as SignupResponse;
       console.log("📋 Parsed response:", response);
       
-      if (response.success) {
-        console.log("✅ Signup successful!");
-        setUserCredentials({
-          uniqueId: response.user_id || "",
-          password: password,
-          phoneNumber: phoneNumber
-        });
-        setShowCredentials(true);
+      if (response.success && response.email && response.password) {
+        console.log("✅ RPC successful! Now creating Supabase auth user...");
         
-        toast({
-          title: "Success!",
-          description: response.message,
+        // Now create the actual Supabase auth user
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: response.email,
+          password: response.password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: {
+              full_name: fullName,
+              unique_user_id: response.user_id
+            }
+          }
         });
+
+        console.log("🔐 Auth Response:", { authData, authError });
+
+        if (authError) {
+          console.error("❌ Auth Error:", authError);
+          throw authError;
+        }
+
+        if (authData.user) {
+          console.log("🎉 Auth user created successfully!");
+          
+          // Update the profile with the actual auth user ID
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ user_id: authData.user.id })
+            .eq('id', response.profile_id);
+
+          if (updateError) {
+            console.error("⚠️ Warning: Failed to update profile user_id:", updateError);
+          }
+
+          setUserCredentials({
+            uniqueId: response.user_id || "",
+            password: password,
+            phoneNumber: phoneNumber
+          });
+          setShowCredentials(true);
+          
+          toast({
+            title: "Success!",
+            description: "Account created! Please check your email to confirm.",
+          });
+        }
       } else {
         console.error("❌ Signup failed:", response.message);
         throw new Error(response.message);
@@ -149,30 +214,56 @@ const CustomAuth = () => {
     try {
       setLoading(true);
       
-      const hashedPassword = hashPassword(password);
+      console.log("🔄 Starting login process...");
+      console.log("📝 Login identifier:", loginIdentifier);
       
-      const { data, error } = await supabase.rpc('handle_custom_login', {
+      // First, get the email associated with the unique ID
+      const { data: loginData, error: loginError } = await supabase.rpc('handle_custom_login', {
         p_identifier: loginIdentifier,
-        p_password_hash: hashedPassword
+        p_password_hash: password // The function still expects p_password_hash parameter
       });
 
-      if (error) throw error;
+      console.log("📨 Login RPC Response:", { loginData, loginError });
 
-      const response = data as unknown as LoginResponse;
-      if (response.success) {
-        // Store user session in localStorage
-        localStorage.setItem('socialslot_user', JSON.stringify(response));
+      if (loginError) {
+        console.error("❌ Login RPC Error:", loginError);
+        throw loginError;
+      }
+
+      const response = loginData as unknown as LoginResponse;
+      
+      if (response.success && response.email) {
+        console.log("✅ Got email from RPC, now signing in with Supabase auth...");
         
-        toast({
-          title: "Login Successful!",
-          description: `Welcome back, ${response.full_name}`,
+        // Now sign in with Supabase auth using the email and password
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+          email: response.email,
+          password: password,
         });
-        
-        navigate('/social-connect');
+
+        console.log("🔐 Supabase Auth Response:", { authData, authError });
+
+        if (authError) {
+          console.error("❌ Supabase Auth Error:", authError);
+          throw authError;
+        }
+
+        if (authData.user) {
+          console.log("🎉 Login successful!");
+          
+          toast({
+            title: "Login Successful!",
+            description: `Welcome back, ${response.full_name}`,
+          });
+          
+          // The useEffect will handle redirecting to dashboard
+        }
       } else {
+        console.error("❌ Login failed:", response.message);
         throw new Error(response.message || "Login failed");
       }
     } catch (error: any) {
+      console.error("💥 Login error:", error);
       toast({
         title: "Login Failed",
         description: error.message,
