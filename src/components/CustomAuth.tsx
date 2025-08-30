@@ -85,8 +85,13 @@ const CustomAuth = () => {
     try {
       setLoading(true);
       
-      const hashedPassword = hashPassword(password);
+      console.log("🔄 Starting signup process...");
+      console.log("📝 Form data:", { fullName, phoneNumber, email, referralCode });
       
+      const hashedPassword = hashPassword(password);
+      console.log("🔒 Password hashed");
+      
+      console.log("📡 Calling handle_custom_signup RPC...");
       const { data, error } = await supabase.rpc('handle_custom_signup', {
         p_full_name: fullName,
         p_phone_number: phoneNumber,
@@ -95,10 +100,18 @@ const CustomAuth = () => {
         p_referral_code: referralCode || null
       });
 
-      if (error) throw error;
+      console.log("📨 RPC Response:", { data, error });
+
+      if (error) {
+        console.error("❌ RPC Error:", error);
+        throw error;
+      }
 
       const response = data as unknown as SignupResponse;
+      console.log("📋 Parsed response:", response);
+      
       if (response.success) {
+        console.log("✅ Signup successful!");
         setUserCredentials({
           uniqueId: response.user_id || "",
           password: password,
@@ -111,10 +124,12 @@ const CustomAuth = () => {
           description: response.message,
         });
       } else {
+        console.error("❌ Signup failed:", response.message);
         throw new Error(response.message);
       }
     } catch (error: any) {
-      setSignupError(error.message);
+      console.error("💥 Signup error:", error);
+      setSignupError(error.message || "An unknown error occurred");
       setShowSignupFailure(true);
     } finally {
       setLoading(false);
