@@ -19,14 +19,8 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           display_name: string | null
-          email: string | null
-          full_name: string | null
           id: string
-          password_hash: string | null
-          phone_number: string | null
-          referral_code: string | null
           social_accounts: Json | null
-          unique_user_id: string | null
           updated_at: string
           user_id: string
         }
@@ -34,14 +28,8 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
-          email?: string | null
-          full_name?: string | null
           id?: string
-          password_hash?: string | null
-          phone_number?: string | null
-          referral_code?: string | null
           social_accounts?: Json | null
-          unique_user_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -49,14 +37,8 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
-          email?: string | null
-          full_name?: string | null
           id?: string
-          password_hash?: string | null
-          phone_number?: string | null
-          referral_code?: string | null
           social_accounts?: Json | null
-          unique_user_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -67,35 +49,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      create_user_profile: {
-        Args: {
-          p_auth_user_id: string
-          p_email: string
-          p_full_name: string
-          p_phone_number: string
-          p_referral_code?: string
-          p_unique_user_id: string
-        }
-        Returns: Json
-      }
-      generate_unique_user_id: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      handle_custom_login: {
-        Args: { p_identifier: string; p_password_hash: string }
-        Returns: Json
-      }
-      handle_custom_signup: {
-        Args: {
-          p_email?: string
-          p_full_name: string
-          p_password: string
-          p_phone_number: string
-          p_referral_code?: string
-        }
-        Returns: Json
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
