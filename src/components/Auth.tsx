@@ -17,6 +17,7 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [referralCode, setReferralCode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
@@ -86,7 +87,8 @@ const Auth = () => {
       options: {
         emailRedirectTo: redirectUrl,
         data: {
-          full_name: displayName
+          full_name: displayName,
+          referral_code: referralCode
         }
       }
     });
@@ -107,7 +109,11 @@ const Auth = () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: redirectUrl
+        redirectTo: redirectUrl,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        }
       }
     });
     
@@ -238,21 +244,37 @@ const Auth = () => {
             {/* Email/Password Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               {isSignUp && (
-                <div className="space-y-2">
-                  <Label htmlFor="displayName" className="text-foreground">Full Name</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      id="displayName"
-                      type="text"
-                      placeholder="Enter your full name"
-                      value={displayName}
-                      onChange={(e) => setDisplayName(e.target.value)}
-                      className="pl-10 glassmorphism border-border/50 focus:border-primary"
-                      required={isSignUp}
-                    />
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="displayName" className="text-foreground">Full Name</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="displayName"
+                        type="text"
+                        placeholder="Enter your full name"
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        className="pl-10 glassmorphism border-border/50 focus:border-primary"
+                        required={isSignUp}
+                      />
+                    </div>
                   </div>
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="referralCode" className="text-foreground">Referral Code (Optional)</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="referralCode"
+                        type="text"
+                        placeholder="Enter referral code"
+                        value={referralCode}
+                        onChange={(e) => setReferralCode(e.target.value)}
+                        className="pl-10 glassmorphism border-border/50 focus:border-primary"
+                      />
+                    </div>
+                  </div>
+                </>
               )}
 
               <div className="space-y-2">

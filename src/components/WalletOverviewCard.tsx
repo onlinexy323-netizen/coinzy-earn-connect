@@ -71,12 +71,19 @@ const WalletOverviewCard: React.FC<WalletOverviewCardProps> = ({
           </Button>
           
           <Button
-            onClick={handleWithdraw}
+            onClick={() => {
+              // Withdrawal feature coming soon
+              toast({
+                title: "Coming Soon",
+                description: "Withdrawal feature will be available soon. For now, use your balance for slot bookings."
+              });
+            }}
             variant="outline"
             size="sm"
-            className="group hover:border-success hover:text-success"
+            className="group cursor-not-allowed opacity-50"
+            disabled
           >
-            <ArrowUpRight className="w-4 h-4 mr-1 group-hover:animate-pulse" />
+            <ArrowUpRight className="w-4 h-4 mr-1" />
             Withdraw
           </Button>
         </div>

@@ -13,6 +13,7 @@ import WalletOverview from './WalletOverview';
 import GrowthChart from './GrowthChart';
 import ActivityFeed from './ActivityFeed';
 import { useSocialMediaData } from '@/hooks/useSocialMediaData';
+import { useAuthData } from '@/hooks/useAuthData';
 
 // Import category images
 import fitnessImage from '@/assets/fitness-category.jpg';
@@ -33,6 +34,12 @@ const Dashboard = () => {
     getTotalFollowers,
     getConnectedPlatforms 
   } = useSocialMediaData();
+  
+  const { 
+    getUserDisplayName: getAuthDisplayName,
+    getUserEmail,
+    getUserAvatar: getAuthAvatar
+  } = useAuthData();
 
   // Check if slot booking is currently active (6 PM - 8 PM)
   const isSlotActive = () => {
@@ -41,10 +48,11 @@ const Dashboard = () => {
     return currentHour >= 18 && currentHour < 20; // 6 PM to 8 PM
   };
 
-  // User data from social media
+  // User data combining social media and auth data
   const userData = {
-    name: getUserDisplayName(),
-    avatar: getUserAvatar(),
+    name: getUserDisplayName() || getAuthDisplayName(),
+    email: getUserEmail(),
+    avatar: getUserAvatar() || getAuthAvatar(),
     socialStats: {
       totalFollowers: getTotalFollowers(),
       connectedPlatforms: getConnectedPlatforms(),
@@ -197,7 +205,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h1 className="text-2xl font-bold text-foreground">
-                    Welcome back, {userData.name}! 👋
+                    {userData.name}
                   </h1>
                   <p className="text-muted-foreground">
                     {userData.socialStats.connectedPlatforms.length > 0 
@@ -329,11 +337,17 @@ const Dashboard = () => {
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Email</label>
-                    <div className="mt-1 text-lg font-medium">rajesh@example.com</div>
+                    <div className="mt-1 text-lg font-medium">{userData.email}</div>
                   </div>
+                  {userData.socialStats.primaryPlatform && (
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Primary Platform</label>
+                      <div className="mt-1 text-lg font-medium capitalize">{userData.socialStats.primaryPlatform}</div>
+                    </div>
+                  )}
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Phone</label>
-                    <div className="mt-1 text-lg font-medium">+91 98765 43210</div>
+                    <label className="text-sm font-medium text-muted-foreground">Total Followers</label>
+                    <div className="mt-1 text-lg font-medium text-primary">{userData.socialStats.totalFollowers.toLocaleString()}</div>
                   </div>
                 </div>
               </div>

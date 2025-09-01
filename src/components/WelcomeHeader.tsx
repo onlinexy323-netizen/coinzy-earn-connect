@@ -29,9 +29,9 @@ const WelcomeHeader = ({ user, stats }: WelcomeHeaderProps) => {
           </Avatar>
           <div>
             <h1 className="text-2xl font-bold text-foreground">
-              Welcome back, {user.name} 👋
+              {user.name}
             </h1>
-            <p className="text-muted-foreground">Ready to grow your earnings today?</p>
+            <p className="text-muted-foreground">Social Media Creator</p>
           </div>
         </div>
       </div>
