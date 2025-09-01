@@ -46,13 +46,36 @@ const Auth = () => {
       setSession(session);
       setUser(session?.user ?? null);
       
-      if (session?.user && !showSocialConnect && !showCongratulation) {
-        setShowSocialConnect(true);
-      }
+        if (session?.user && !showSocialConnect && !showCongratulation) {
+          checkSocialConnection(session.user.id);
+        }
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const checkSocialConnection = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('social_media_accounts')
+        .select('id')
+        .eq('user_id', userId)
+        .limit(1);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        // User has connected accounts, redirect to dashboard
+        navigate('/dashboard');
+      } else {
+        // No connected accounts, show social connect
+        setShowSocialConnect(true);
+      }
+    } catch (error) {
+      console.error('Error checking social connection:', error);
+      setShowSocialConnect(true);
+    }
+  };
 
   const signUp = async (email: string, password: string, displayName: string) => {
     const redirectUrl = `${window.location.origin}/`;
@@ -143,6 +166,11 @@ const Auth = () => {
     setConnectedPlatform(platform);
     setShowSocialConnect(false);
     setShowCongratulation(true);
+    
+    // Redirect to dashboard after congratulation
+    setTimeout(() => {
+      navigate('/dashboard');
+    }, 3000);
   };
 
   // Show congratulation screen

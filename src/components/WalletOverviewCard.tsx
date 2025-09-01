@@ -2,6 +2,8 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Wallet, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { useRazorpayPayment } from './RazorpayPayment';
+import { useToast } from '@/hooks/use-toast';
 
 interface WalletOverviewCardProps {
   balance: number;
@@ -14,6 +16,30 @@ const WalletOverviewCard: React.FC<WalletOverviewCardProps> = ({
   onDeposit, 
   onWithdraw 
 }) => {
+  const { toast } = useToast();
+  const { initializePayment } = useRazorpayPayment();
+
+  const handleDeposit = () => {
+    initializePayment(1000, () => {
+      onDeposit();
+      // Refresh the page to update balance
+      window.location.reload();
+    }, (error) => {
+      toast({
+        variant: "destructive",
+        title: "Payment Error",
+        description: "There was an issue with your payment. Please try again."
+      });
+    });
+  };
+
+  const handleWithdraw = () => {
+    toast({
+      title: "Withdrawal Initiated",
+      description: "Your withdrawal request has been submitted and will be processed within 2 hours."
+    });
+    onWithdraw();
+  };
   return (
     <Card className="gradient-card border-border/50 shadow-card">
       <CardHeader className="pb-3">
@@ -35,7 +61,7 @@ const WalletOverviewCard: React.FC<WalletOverviewCardProps> = ({
         
         <div className="grid grid-cols-2 gap-3">
           <Button
-            onClick={onDeposit}
+            onClick={handleDeposit}
             variant="hero"
             size="sm"
             className="group"
@@ -45,7 +71,7 @@ const WalletOverviewCard: React.FC<WalletOverviewCardProps> = ({
           </Button>
           
           <Button
-            onClick={onWithdraw}
+            onClick={handleWithdraw}
             variant="outline"
             size="sm"
             className="group hover:border-success hover:text-success"

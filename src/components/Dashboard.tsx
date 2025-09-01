@@ -12,6 +12,7 @@ import TodaySummaryCard from './TodaySummaryCard';
 import WalletOverview from './WalletOverview';
 import GrowthChart from './GrowthChart';
 import ActivityFeed from './ActivityFeed';
+import { useSocialMediaData } from '@/hooks/useSocialMediaData';
 
 // Import category images
 import fitnessImage from '@/assets/fitness-category.jpg';
@@ -25,6 +26,13 @@ const Dashboard = () => {
   const [isSlotBooked, setIsSlotBooked] = useState(false);
   const [bookedAmount, setBookedAmount] = useState<number>(0);
   const { toast } = useToast();
+  const { 
+    getUserDisplayName, 
+    getUserAvatar, 
+    primaryAccount,
+    getTotalFollowers,
+    getConnectedPlatforms 
+  } = useSocialMediaData();
 
   // Check if slot booking is currently active (6 PM - 8 PM)
   const isSlotActive = () => {
@@ -33,10 +41,15 @@ const Dashboard = () => {
     return currentHour >= 18 && currentHour < 20; // 6 PM to 8 PM
   };
 
-  // Mock user data
+  // User data from social media
   const userData = {
-    name: 'Rajesh Kumar',
-    avatar: undefined
+    name: getUserDisplayName(),
+    avatar: getUserAvatar(),
+    socialStats: {
+      totalFollowers: getTotalFollowers(),
+      connectedPlatforms: getConnectedPlatforms(),
+      primaryPlatform: primaryAccount?.platform || null
+    }
   };
 
   // Mock wallet data
@@ -186,8 +199,23 @@ const Dashboard = () => {
                   <h1 className="text-2xl font-bold text-foreground">
                     Welcome back, {userData.name}! 👋
                   </h1>
-                  <p className="text-muted-foreground">Ready to boost your earnings today?</p>
+                  <p className="text-muted-foreground">
+                    {userData.socialStats.connectedPlatforms.length > 0 
+                      ? `${userData.socialStats.totalFollowers.toLocaleString()} followers across ${userData.socialStats.connectedPlatforms.length} platform(s)`
+                      : 'Ready to boost your earnings today?'
+                    }
+                  </p>
                 </div>
+                {userData.socialStats.primaryPlatform && (
+                  <div className="text-right">
+                    <div className="text-sm text-muted-foreground capitalize">
+                      Primary: {userData.socialStats.primaryPlatform}
+                    </div>
+                    <div className="text-lg font-semibold text-primary">
+                      @{primaryAccount?.account_handle}
+                    </div>
+                  </div>
+                )}
               </div>
               
               {/* Countdown Banner */}

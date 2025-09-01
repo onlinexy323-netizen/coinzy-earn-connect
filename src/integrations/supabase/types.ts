@@ -19,8 +19,14 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           display_name: string | null
+          email: string | null
+          full_name: string | null
           id: string
+          password_hash: string | null
+          phone_number: string | null
+          referral_code: string | null
           social_accounts: Json | null
+          unique_user_id: string | null
           updated_at: string
           user_id: string
         }
@@ -28,8 +34,14 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
+          full_name?: string | null
           id?: string
+          password_hash?: string | null
+          phone_number?: string | null
+          referral_code?: string | null
           social_accounts?: Json | null
+          unique_user_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -37,8 +49,92 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
+          full_name?: string | null
           id?: string
+          password_hash?: string | null
+          phone_number?: string | null
+          referral_code?: string | null
           social_accounts?: Json | null
+          unique_user_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      social_media_accounts: {
+        Row: {
+          account_handle: string
+          connected_at: string
+          display_name: string
+          follower_count: number | null
+          id: string
+          is_verified: boolean | null
+          platform: string
+          profile_image_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_handle: string
+          connected_at?: string
+          display_name: string
+          follower_count?: number | null
+          id?: string
+          is_verified?: boolean | null
+          platform: string
+          profile_image_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_handle?: string
+          connected_at?: string
+          display_name?: string
+          follower_count?: number | null
+          id?: string
+          is_verified?: boolean | null
+          platform?: string
+          profile_image_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
+          razorpay_signature: string | null
+          status: string
+          transaction_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          razorpay_signature?: string | null
+          status?: string
+          transaction_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          razorpay_signature?: string | null
+          status?: string
+          transaction_type?: string
           updated_at?: string
           user_id?: string
         }
@@ -49,7 +145,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_user_profile: {
+        Args: {
+          p_auth_user_id: string
+          p_email: string
+          p_full_name: string
+          p_phone_number: string
+          p_referral_code?: string
+          p_unique_user_id: string
+        }
+        Returns: Json
+      }
+      generate_unique_user_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      handle_custom_login: {
+        Args: { p_identifier: string; p_password_hash: string }
+        Returns: Json
+      }
+      handle_custom_signup: {
+        Args: {
+          p_email?: string
+          p_full_name: string
+          p_password: string
+          p_phone_number: string
+          p_referral_code?: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

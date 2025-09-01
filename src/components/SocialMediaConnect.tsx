@@ -1,16 +1,23 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Instagram, Facebook, Youtube, CheckCircle, ArrowRight, Sparkles } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { Instagram, Facebook, Youtube, Check, Loader2, User, Sparkles, ArrowRight } from 'lucide-react';
 
 interface SocialMediaConnectProps {
   onConnect: (platform: string) => void;
 }
 
-const SocialMediaConnect = ({ onConnect }: SocialMediaConnectProps) => {
-  const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
+const SocialMediaConnect: React.FC<SocialMediaConnectProps> = ({ onConnect }) => {
+  const [selectedPlatform, setSelectedPlatform] = useState<string>('');
   const [connecting, setConnecting] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
+  const [accountHandle, setAccountHandle] = useState('');
+  const [currentPlatform, setCurrentPlatform] = useState('');
   const { toast } = useToast();
 
   const platforms = [
@@ -41,18 +48,68 @@ const SocialMediaConnect = ({ onConnect }: SocialMediaConnectProps) => {
   ];
 
   const handleConnect = async (platformId: string) => {
-    setSelectedPlatform(platformId);
-    setConnecting(true);
+    setCurrentPlatform(platformId);
+    setShowDialog(true);
+  };
 
-    // Simulate connection process
-    setTimeout(() => {
-      setConnecting(false);
-      onConnect(platformId);
+  const handleAccountSubmit = async () => {
+    if (!accountHandle.trim()) {
       toast({
-        title: "Connection Successful!",
-        description: `Your ${platforms.find(p => p.id === platformId)?.name} account is now connected.`,
+        variant: "destructive",
+        title: "Invalid Handle",
+        description: "Please enter a valid account handle."
       });
-    }, 2000);
+      return;
+    }
+
+    setConnecting(true);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Mock fetch social media details (in real app, you'd call an API)
+      const mockUserData = {
+        instagram: { name: 'Sarah Wilson', followers: 15200, verified: true },
+        facebook: { name: 'Michael Chen', followers: 8500, verified: false },
+        youtube: { name: 'Alex Rivera', followers: 22100, verified: true }
+      };
+
+      const userData = mockUserData[currentPlatform as keyof typeof mockUserData] || 
+                     { name: accountHandle, followers: Math.floor(Math.random() * 10000), verified: false };
+
+      // Save to database
+      const { error } = await supabase
+        .from('social_media_accounts')
+        .insert({
+          user_id: user.id,
+          platform: currentPlatform,
+          account_handle: accountHandle,
+          display_name: userData.name,
+          follower_count: userData.followers,
+          is_verified: userData.verified
+        });
+
+      if (error) throw error;
+
+      setConnecting(false);
+      setShowDialog(false);
+      setAccountHandle('');
+      onConnect(currentPlatform);
+      
+      toast({
+        title: "Connected Successfully! 🎉",
+        description: `Your ${platforms.find(p => p.id === currentPlatform)?.name} account has been connected.`
+      });
+    } catch (error) {
+      console.error('Error connecting account:', error);
+      setConnecting(false);
+      toast({
+        variant: "destructive",
+        title: "Connection Failed",
+        description: "There was an error connecting your account. Please try again."
+      });
+    }
   };
 
   return (
@@ -82,7 +139,7 @@ const SocialMediaConnect = ({ onConnect }: SocialMediaConnectProps) => {
           {platforms.map((platform) => {
             const IconComponent = platform.icon;
             const isSelected = selectedPlatform === platform.id;
-            const isConnecting = connecting && isSelected;
+            const isConnecting = connecting && currentPlatform === platform.id;
             
             return (
               <Card 
@@ -123,7 +180,7 @@ const SocialMediaConnect = ({ onConnect }: SocialMediaConnectProps) => {
                   >
                     {isConnecting ? (
                       <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                         Connecting...
                       </>
                     ) : (
@@ -154,6 +211,55 @@ const SocialMediaConnect = ({ onConnect }: SocialMediaConnectProps) => {
           </p>
         </div>
       </div>
+
+      {/* Account Handle Dialog */}
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              Connect {platforms.find(p => p.id === currentPlatform)?.name} Account
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="handle">Account Handle/Username</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="handle"
+                  placeholder={`@username or ${currentPlatform}.com/username`}
+                  value={accountHandle}
+                  onChange={(e) => setAccountHandle(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <div className="flex space-x-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowDialog(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleAccountSubmit}
+                disabled={connecting}
+                className="flex-1"
+              >
+                {connecting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Connecting...
+                  </>
+                ) : (
+                  'Connect'
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
