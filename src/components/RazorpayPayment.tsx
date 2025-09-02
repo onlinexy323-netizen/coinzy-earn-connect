@@ -15,21 +15,14 @@ export const useRazorpayPayment = () => {
 
   const initializePayment = async (amount: number, onSuccess?: () => void, onError?: (error: any) => void) => {
     try {
-      // Wait for session to be available and retry a few times
-      let user = null;
-      let attempts = 0;
-      const maxAttempts = 3;
+      // Get current session directly
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      while (!user && attempts < maxAttempts) {
-        const { data: { user: currentUser } } = await supabase.auth.getUser();
-        user = currentUser;
-        if (!user) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          attempts++;
-        }
+      if (sessionError || !session?.user) {
+        throw new Error('User not authenticated. Please log in again.');
       }
       
-      if (!user) throw new Error('User not authenticated');
+      const user = session.user;
 
       // Create transaction record
       const { data: transaction, error: transactionError } = await supabase

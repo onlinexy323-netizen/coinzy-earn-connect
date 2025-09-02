@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import LandingPage from "./components/LandingPage";
 import Dashboard from "./components/Dashboard";
 import Auth from "./components/Auth";
+import SocialMediaConnect from "./components/SocialMediaConnect";
+import UserProfile from "./components/UserProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -54,6 +56,16 @@ const App = () => (
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/social-connect" element={
+            <ProtectedRoute>
+              <SocialMediaConnect onConnect={() => {}} />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <UserProfile />
             </ProtectedRoute>
           } />
           <Route path="/connect" element={<Auth />} />

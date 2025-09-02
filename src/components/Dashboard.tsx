@@ -7,14 +7,16 @@ import BottomNavigation from './BottomNavigation';
 import ModernSidebar from './ModernSidebar';
 import CategoryCard from './CategoryCard';
 import WalletOverviewCard from './WalletOverviewCard';
-import CountdownBanner from './CountdownBanner';
-import ReferralCard from './ReferralCard';
 import TodaySummaryCard from './TodaySummaryCard';
+import CountdownBanner from './CountdownBanner';
 import WalletOverview from './WalletOverview';
 import GrowthChart from './GrowthChart';
 import ActivityFeed from './ActivityFeed';
-import { useSocialMediaData } from '@/hooks/useSocialMediaData';
+import CongratulationEffect from './CongratulationEffect';
+import ReferralCard from './ReferralCard';
+import WithdrawalForm from './WithdrawalForm';
 import { useAuthData } from '@/hooks/useAuthData';
+import { useSocialMediaData } from '@/hooks/useSocialMediaData';
 
 // Import category images
 import fitnessImage from '@/assets/fitness-category.jpg';
@@ -27,6 +29,7 @@ const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isSlotBooked, setIsSlotBooked] = useState(false);
   const [bookedAmount, setBookedAmount] = useState<number>(0);
+  const [showWithdrawalForm, setShowWithdrawalForm] = useState(false);
   const { toast } = useToast();
   const { 
     getUserDisplayName, 
@@ -183,10 +186,7 @@ const Dashboard = () => {
   };
 
   const handleWithdraw = () => {
-    toast({
-      title: "Withdrawal Initiated",
-      description: "Your withdrawal request has been submitted and will be processed within 2 hours."
-    });
+    setShowWithdrawalForm(true);
   };
 
   const handleDeposit = () => {
@@ -474,6 +474,12 @@ const Dashboard = () => {
       <BottomNavigation 
         activeTab={activeTab} 
         onTabChange={setActiveTab} 
+      />
+      
+      <WithdrawalForm
+        isOpen={showWithdrawalForm}
+        onClose={() => setShowWithdrawalForm(false)}
+        currentBalance={walletData.availableBalance}
       />
     </div>
   );

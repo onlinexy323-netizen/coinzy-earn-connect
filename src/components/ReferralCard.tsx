@@ -17,13 +17,22 @@ const ReferralCard: React.FC<ReferralCardProps> = ({
 }) => {
   const { toast } = useToast();
 
-  const handleCopyReferralCode = () => {
-    const referralLink = `https://socialslot.app/signup?ref=${referralCode}`;
-    navigator.clipboard.writeText(referralLink);
-    toast({
-      title: "Referral Link Copied! 🎉",
-      description: "Share with friends to earn rewards when they join."
-    });
+  const handleCopyReferralCode = async () => {
+    const referralLink = `https://coinzy-seven.vercel.app/?ref=${referralCode}`;
+    
+    try {
+      await navigator.clipboard.writeText(referralLink);
+      toast({
+        title: "Referral Link Copied! 🎉",
+        description: "Share this link to earn ₹50 for each successful referral."
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Copy Failed",
+        description: "Could not copy referral link to clipboard."
+      });
+    }
   };
 
   return (

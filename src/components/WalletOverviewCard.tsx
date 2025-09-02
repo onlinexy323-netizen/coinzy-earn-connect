@@ -34,10 +34,6 @@ const WalletOverviewCard: React.FC<WalletOverviewCardProps> = ({
   };
 
   const handleWithdraw = () => {
-    toast({
-      title: "Withdrawal Initiated",
-      description: "Your withdrawal request has been submitted and will be processed within 2 hours."
-    });
     onWithdraw();
   };
   return (
@@ -71,17 +67,10 @@ const WalletOverviewCard: React.FC<WalletOverviewCardProps> = ({
           </Button>
           
           <Button
-            onClick={() => {
-              // Withdrawal feature coming soon
-              toast({
-                title: "Coming Soon",
-                description: "Withdrawal feature will be available soon. For now, use your balance for slot bookings."
-              });
-            }}
+            onClick={handleWithdraw}
             variant="outline"
             size="sm"
-            className="group cursor-not-allowed opacity-50"
-            disabled
+            className="group"
           >
             <ArrowUpRight className="w-4 h-4 mr-1" />
             Withdraw
