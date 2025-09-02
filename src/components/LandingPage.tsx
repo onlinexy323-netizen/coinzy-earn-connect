@@ -1,14 +1,61 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowRight, TrendingUp, Shield, Zap, Star, Users, CheckCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import heroImage from '@/assets/coinzy-hero.jpg';
 import fitnessCategory from '@/assets/fitness-category.jpg';
 import beautyCategory from '@/assets/beauty-category.jpg';
 import techCategory from '@/assets/tech-category.jpg';
 
 const LandingPage = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check authentication state
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+      
+      // If user is already authenticated, redirect to dashboard
+      if (session) {
+        navigate('/dashboard');
+      }
+      setLoading(false);
+    };
+
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setIsAuthenticated(!!session);
+        if (session) {
+          navigate('/dashboard');
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  const handleGetStarted = () => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    } else {
+      navigate('/auth');
+    }
+  };
+
+  if (loading) {
+    return <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -50,12 +97,15 @@ const LandingPage = () => {
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/dashboard">
-                  <Button variant="hero" size="lg" className="w-full sm:w-auto">
-                    Start Earning Today
-                    <ArrowRight className="w-5 h-5" />
-                  </Button>
-                </Link>
+                <Button 
+                  onClick={handleGetStarted}
+                  variant="hero" 
+                  size="lg" 
+                  className="w-full sm:w-auto"
+                >
+                  Start Earning Today
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
                 <Button variant="outline" size="lg">
                   Watch Demo
                 </Button>
@@ -199,12 +249,15 @@ const LandingPage = () => {
           <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
             Join thousands of users who are already earning daily returns with verified international ad agencies.
           </p>
-          <Link to="/dashboard">
-            <Button variant="secondary" size="lg" className="bg-white text-primary hover:bg-white/90">
-              Get Started Now
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-          </Link>
+          <Button 
+            onClick={handleGetStarted}
+            variant="secondary" 
+            size="lg" 
+            className="bg-white text-primary hover:bg-white/90"
+          >
+            Get Started Now
+            <ArrowRight className="w-5 h-5" />
+          </Button>
         </div>
       </section>
 

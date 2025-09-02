@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import BottomNavigation from './BottomNavigation';
 import ModernSidebar from './ModernSidebar';
 import CategoryCard from './CategoryCard';
@@ -203,27 +204,40 @@ const Dashboard = () => {
             {/* Welcome Section */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-2xl font-bold text-foreground">
-                    {userData.name}
-                  </h1>
-                  <p className="text-muted-foreground">
-                    {userData.socialStats.connectedPlatforms.length > 0 
-                      ? `${userData.socialStats.totalFollowers.toLocaleString()} followers across ${userData.socialStats.connectedPlatforms.length} platform(s)`
-                      : 'Ready to boost your earnings today?'
-                    }
-                  </p>
-                </div>
-                {userData.socialStats.primaryPlatform && (
-                  <div className="text-right">
-                    <div className="text-sm text-muted-foreground capitalize">
-                      Primary: {userData.socialStats.primaryPlatform}
-                    </div>
-                    <div className="text-lg font-semibold text-primary">
-                      @{primaryAccount?.account_handle}
-                    </div>
+                <div className="flex items-center space-x-4">
+                  <div className="relative">
+                    <Avatar className="h-16 w-16 ring-2 ring-primary/20">
+                      <AvatarImage src={userData.avatar} alt={userData.name} />
+                      <AvatarFallback className="bg-gradient-primary text-white font-semibold text-lg">
+                        {userData.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    {userData.socialStats.primaryPlatform && (
+                      <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-card rounded-full border-2 border-background flex items-center justify-center">
+                        {userData.socialStats.primaryPlatform === 'instagram' && (
+                          <div className="w-4 h-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+                        )}
+                        {userData.socialStats.primaryPlatform === 'facebook' && (
+                          <div className="w-4 h-4 bg-blue-600 rounded-full"></div>
+                        )}
+                        {userData.socialStats.primaryPlatform === 'youtube' && (
+                          <div className="w-4 h-4 bg-red-600 rounded-full"></div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                )}
+                  <div>
+                    <h1 className="text-2xl font-bold text-foreground">
+                      {userData.name}
+                    </h1>
+                    <p className="text-muted-foreground">
+                      {userData.socialStats.primaryPlatform 
+                        ? `@${primaryAccount?.account_handle} • ${userData.socialStats.primaryPlatform}`
+                        : 'Ready to boost your earnings today?'
+                      }
+                    </p>
+                  </div>
+                </div>
               </div>
               
               {/* Countdown Banner */}
