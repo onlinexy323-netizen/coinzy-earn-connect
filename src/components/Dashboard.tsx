@@ -64,12 +64,12 @@ const Dashboard = () => {
     }
   };
 
-  // Mock wallet data
+  // Mock wallet data - for new users start with 0
   const walletData = {
-    totalDeposited: 25000,
-    totalEarnings: 3250,
-    totalWithdrawn: 8000,
-    availableBalance: 12500
+    totalDeposited: 0,
+    totalEarnings: 0,
+    totalWithdrawn: 0,
+    availableBalance: 0
   };
 
   // Mock categories data
@@ -108,11 +108,11 @@ const Dashboard = () => {
     }
   ];
 
-  // Mock referral data
+  // Mock referral data - start with 0 for new users
   const referralData = {
-    referralCode: 'RK2024',
-    referralEarnings: 1250,
-    totalReferrals: 8
+    referralCode: userData.name?.replace(/\s+/g, '').slice(0, 6).toUpperCase() + '2024' || 'USER2024',
+    referralEarnings: 0,
+    totalReferrals: 0
   };
 
   // Mock today's booked slots
@@ -127,61 +127,29 @@ const Dashboard = () => {
     }
   ] : [];
 
-  // Mock chart data
+  // Mock chart data - start empty for new users  
   const chartData = [
-    { date: '1 Jan', deposits: 5000, earnings: 225, withdrawals: 0, balance: 5225 },
-    { date: '5 Jan', deposits: 7000, earnings: 540, withdrawals: 0, balance: 7540 },
-    { date: '10 Jan', deposits: 10000, earnings: 890, withdrawals: 2000, balance: 8890 },
-    { date: '15 Jan', deposits: 15000, earnings: 1340, withdrawals: 3000, balance: 13340 },
-    { date: '20 Jan', deposits: 20000, earnings: 1820, withdrawals: 5000, balance: 16820 },
-    { date: '25 Jan', deposits: 25000, earnings: 2350, withdrawals: 8000, balance: 19350 },
-    { date: '30 Jan', deposits: 25000, earnings: 3250, withdrawals: 8000, balance: 20250 }
+    { date: 'Today', deposits: 0, earnings: 0, withdrawals: 0, balance: 0 }
   ];
 
-  // Mock activity data
+  // Mock activity data - start empty for new users
   const activityData = [
     {
       id: '1',
-      type: 'earning' as const,
-      description: 'Earning credited +₹125 (4.5%)',
-      amount: 125,
-      timestamp: '2 hours ago',
-      status: 'completed' as const
-    },
-    {
-      id: '2',
-      type: 'booking' as const,
-      description: 'You booked ₹2,500 slot',
-      amount: 2500,
-      timestamp: '1 day ago',
-      status: 'completed' as const
-    },
-    {
-      id: '3',
-      type: 'withdrawal' as const,
-      description: 'Withdrawal request of ₹1,000 submitted',
-      amount: 1000,
-      timestamp: '2 days ago',
-      status: 'pending' as const
-    },
-    {
-      id: '4',
       type: 'deposit' as const,
-      description: 'Deposit of ₹5,000 credited',
-      amount: 5000,
-      timestamp: '3 days ago',
+      description: 'Welcome to Coinzy! Start by depositing money to begin earning.',
+      amount: 0,
+      timestamp: 'Just now',
       status: 'completed' as const
     }
   ];
 
-  const handleBookSlot = (categoryId: string) => {
-    // For demo, we'll use a fixed amount of ₹1000
-    const amount = 1000;
+  const handleBookSlot = (categoryId: string, amount: number) => {
     setIsSlotBooked(true);
     setBookedAmount(amount);
     toast({
       title: "Slot Booked Successfully! 🎉",
-      description: `Your ₹${amount} slot in ${categories.find(c => c.id === categoryId)?.name} is now active. Returns will be credited tomorrow at 12 PM.`
+      description: `Your ₹${amount.toLocaleString()} investment in ${categories.find(c => c.id === categoryId)?.name} is now active. Returns will be credited tomorrow at 12 PM.`
     });
   };
 
@@ -191,8 +159,8 @@ const Dashboard = () => {
 
   const handleDeposit = () => {
     toast({
-      title: "Redirecting to Payment",
-      description: "Opening secure payment gateway..."
+      title: "Deposit Successful",
+      description: "Your money will be added to your wallet."
     });
   };
 
@@ -287,7 +255,7 @@ const Dashboard = () => {
             </div>
             <WalletOverview walletData={walletData} />
             <GrowthChart data={chartData} />
-            <ActivityFeed activities={activityData.filter(a => a.type === 'deposit' || a.type === 'withdrawal')} />
+            <ActivityFeed activities={activityData.filter(a => a.type === 'deposit' || a.type === 'withdrawal' || a.type === 'earning' || a.type === 'booking')} />
           </div>
         );
       

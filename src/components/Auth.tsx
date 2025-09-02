@@ -4,10 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, ArrowLeft, Mail, Lock, User } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, ArrowLeft, Mail, Lock, User, Gift } from 'lucide-react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 import SocialMediaConnect from './SocialMediaConnect';
 import CongratulationEffect from './CongratulationEffect';
@@ -25,11 +26,20 @@ const Auth = () => {
   const [showSocialConnect, setShowSocialConnect] = useState(false);
   const [showCongratulation, setShowCongratulation] = useState(false);
   const [connectedPlatform, setConnectedPlatform] = useState<string>('');
+  const [referredByName, setReferredByName] = useState<string>('');
   
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
+    // Check for referral code in URL
+    const refParam = searchParams.get('ref');
+    if (refParam) {
+      setReferralCode(refParam);
+      fetchReferrerName(refParam);
+    }
+    
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -37,7 +47,8 @@ const Auth = () => {
         setUser(session?.user ?? null);
         
         if (session?.user && !showSocialConnect && !showCongratulation) {
-          setShowSocialConnect(true);
+          // Always show social connect for new authentications
+          checkSocialConnection(session.user.id);
         }
       }
     );
@@ -47,13 +58,29 @@ const Auth = () => {
       setSession(session);
       setUser(session?.user ?? null);
       
-        if (session?.user && !showSocialConnect && !showCongratulation) {
-          checkSocialConnection(session.user.id);
-        }
+      if (session?.user && !showSocialConnect && !showCongratulation) {
+        checkSocialConnection(session.user.id);
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, searchParams, showSocialConnect, showCongratulation]);
+
+  const fetchReferrerName = async (referralCode: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('display_name, full_name')
+        .eq('id', referralCode)
+        .single();
+
+      if (!error && data) {
+        setReferredByName(data.display_name || data.full_name || 'Someone');
+      }
+    } catch (error) {
+      console.log('Could not fetch referrer name:', error);
+    }
+  };
 
   const checkSocialConnection = async (userId: string) => {
     try {
@@ -74,6 +101,7 @@ const Auth = () => {
       }
     } catch (error) {
       console.error('Error checking social connection:', error);
+      // For new users or errors, show social connect
       setShowSocialConnect(true);
     }
   };
@@ -198,12 +226,23 @@ const Auth = () => {
         <div className="absolute bottom-1/4 left-1/3 w-24 h-24 gradient-orbital rounded-full animate-pulse delay-1000"></div>
       </div>
 
-      <div className="w-full max-w-md relative z-10">
+        <div className="w-full max-w-md relative z-10">
         {/* Back to Home */}
         <Link to="/" className="flex items-center text-foreground/80 hover:text-foreground mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Home
         </Link>
+
+        {/* Referral Banner */}
+        {referredByName && (
+          <Alert className="mb-6 border-accent/30 bg-accent/5">
+            <Gift className="h-4 w-4 text-accent" />
+            <AlertDescription className="text-accent">
+              You were referred by <strong>{referredByName}</strong>! 
+              You'll both get ₹50 bonus after signup.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Card className="glassmorphism shadow-premium">
           <CardHeader className="text-center pb-4">

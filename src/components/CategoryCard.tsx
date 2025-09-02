@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { TrendingUp, Zap } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
+import InvestmentSlotForm from './InvestmentSlotForm';
 
 interface CategoryCardProps {
   category: {
@@ -12,7 +12,7 @@ interface CategoryCardProps {
     trend: number[];
     isActive: boolean;
   };
-  onBookSlot: (categoryId: string) => void;
+  onBookSlot: (categoryId: string, amount: number) => void;
   isNewUser?: boolean;
 }
 
@@ -26,11 +26,19 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, onBookSlot, isNew
       <div className="flex items-end h-8 space-x-1">
         {data.map((value, index) => {
           const height = ((value - min) / range) * 100;
+          const isIncreasing = index > 0 && value > data[index - 1];
           return (
             <div
               key={index}
-              className="w-1 bg-gradient-to-t from-success to-success/60 rounded-sm transition-all duration-300"
-              style={{ height: `${Math.max(height, 10)}%` }}
+              className={`w-1 rounded-sm transition-all duration-500 ${
+                isIncreasing 
+                  ? 'bg-gradient-to-t from-green-500 to-green-400 animate-pulse' 
+                  : 'bg-gradient-to-t from-success to-success/60'
+              }`}
+              style={{ 
+                height: `${Math.max(height, 10)}%`,
+                animationDelay: `${index * 100}ms`
+              }}
             />
           );
         })}
@@ -72,19 +80,10 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, onBookSlot, isNew
             {isNewUser ? "Fixed slots available" : "Custom amounts allowed"}
           </div>
           
-          <Button
-            onClick={() => onBookSlot(category.id)}
-            disabled={!category.isActive}
-            variant={category.isActive ? "premium" : "outline"}
-            size="sm"
-            className="relative overflow-hidden group/btn"
-          >
-            {category.isActive && (
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-500" />
-            )}
-            <Zap className="w-3 h-3 mr-1" />
-            {category.isActive ? "Book Slot" : "Inactive"}
-          </Button>
+          <InvestmentSlotForm 
+            category={category}
+            onBookSlot={onBookSlot}
+          />
         </div>
       </CardContent>
     </Card>
