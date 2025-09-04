@@ -194,6 +194,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_referral_bonus: {
+        Args: { amount: number; referrer_id: string }
+        Returns: undefined
+      }
       create_user_profile: {
         Args: {
           p_auth_user_id: string
@@ -209,6 +213,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_referrer_by_code: {
+        Args: { ref_code: string }
+        Returns: string
+      }
       handle_custom_login: {
         Args: { p_identifier: string; p_password_hash: string }
         Returns: Json
@@ -222,6 +230,10 @@ export type Database = {
           p_referral_code?: string
         }
         Returns: Json
+      }
+      update_wallet_balance: {
+        Args: { amount_to_add: number; user_id: string }
+        Returns: undefined
       }
     }
     Enums: {
