@@ -209,6 +209,10 @@ export type Database = {
         }
         Returns: Json
       }
+      generate_referral_code: {
+        Args: { user_full_name: string; user_id: string }
+        Returns: string
+      }
       generate_unique_user_id: {
         Args: Record<PropertyKey, never>
         Returns: string

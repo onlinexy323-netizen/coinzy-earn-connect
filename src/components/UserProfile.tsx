@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -26,6 +26,30 @@ const UserProfile: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [copying, setCopying] = useState(false);
+  const [userReferralCode, setUserReferralCode] = useState('');
+
+  // Fetch user's referral code
+  useEffect(() => {
+    const fetchReferralCode = async () => {
+      if (user?.id) {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('referral_code')
+            .eq('user_id', user.id)
+            .single();
+
+          if (data && !error) {
+            setUserReferralCode(data.referral_code || '');
+          }
+        } catch (error) {
+          console.error('Error fetching referral code:', error);
+        }
+      }
+    };
+
+    fetchReferralCode();
+  }, [user]);
 
   const handleSignOut = async () => {
     try {
@@ -45,7 +69,7 @@ const UserProfile: React.FC = () => {
   };
 
   const handleCopyReferral = async () => {
-    const referralLink = `https://coinzy-seven.vercel.app/?ref=${user?.id}`;
+    const referralLink = `${window.location.origin}/?ref=${userReferralCode}`;
     setCopying(true);
     
     try {

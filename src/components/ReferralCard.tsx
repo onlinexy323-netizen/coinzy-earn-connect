@@ -18,8 +18,8 @@ const ReferralCard: React.FC<ReferralCardProps> = ({
   const { toast } = useToast();
 
   const handleCopyReferralCode = async () => {
-    const referralLink = `https://coinzy-seven.vercel.app/?ref=${referralCode}`;
-    
+    const referralLink = `${window.location.origin}/?ref=${referralCode}`;
+  
     try {
       await navigator.clipboard.writeText(referralLink);
       toast({

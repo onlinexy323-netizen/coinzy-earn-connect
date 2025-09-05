@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
@@ -17,6 +17,7 @@ import ReferralCard from './ReferralCard';
 import WithdrawalForm from './WithdrawalForm';
 import { useAuthData } from '@/hooks/useAuthData';
 import { useSocialMediaData } from '@/hooks/useSocialMediaData';
+import { supabase } from '@/integrations/supabase/client';
 
 // Import category images
 import fitnessImage from '@/assets/fitness-category.jpg';
@@ -42,7 +43,8 @@ const Dashboard = () => {
   const { 
     getUserDisplayName: getAuthDisplayName,
     getUserEmail,
-    getUserAvatar: getAuthAvatar
+    getUserAvatar: getAuthAvatar,
+    user
   } = useAuthData();
 
   // Check if slot booking is currently active (6 PM - 8 PM)
@@ -108,12 +110,39 @@ const Dashboard = () => {
     }
   ];
 
-  // Mock referral data - start with 0 for new users
-  const referralData = {
-    referralCode: userData.name?.replace(/\s+/g, '').slice(0, 6).toUpperCase() + '2024' || 'USER2024',
+  // Get actual referral data from user profile
+  const [referralData, setReferralData] = useState({
+    referralCode: 'Loading...',
     referralEarnings: 0,
     totalReferrals: 0
-  };
+  });
+
+  // Fetch user profile data including referral info
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      if (user) {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('referral_code, referral_earnings, total_referrals')
+            .eq('user_id', user.id)
+            .single();
+
+          if (data && !error) {
+            setReferralData({
+              referralCode: data.referral_code || 'Loading...',
+              referralEarnings: data.referral_earnings || 0,
+              totalReferrals: data.total_referrals || 0
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching profile data:', error);
+        }
+      }
+    };
+
+    fetchProfileData();
+  }, [user]);
 
   // Mock today's booked slots
   const bookedSlots = isSlotBooked ? [

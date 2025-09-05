@@ -71,7 +71,7 @@ const Auth = () => {
       const { data, error } = await supabase
         .from('profiles')
         .select('display_name, full_name')
-        .eq('id', referralCode)
+        .eq('referral_code', referralCode)
         .single();
 
       if (!error && data) {
