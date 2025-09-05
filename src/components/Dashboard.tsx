@@ -1,23 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Menu } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { TrendingUp, Calendar, Target, Wallet, Eye, EyeOff } from 'lucide-react';
 import BottomNavigation from './BottomNavigation';
-import ModernSidebar from './ModernSidebar';
-import CategoryCard from './CategoryCard';
-import WalletOverviewCard from './WalletOverviewCard';
-import TodaySummaryCard from './TodaySummaryCard';
-import CountdownBanner from './CountdownBanner';
-import WalletOverview from './WalletOverview';
-import GrowthChart from './GrowthChart';
-import ActivityFeed from './ActivityFeed';
-import CongratulationEffect from './CongratulationEffect';
-import ReferralCard from './ReferralCard';
+import InvestmentCard from './InvestmentCard';
+import WalletCard from './WalletCard';
+import PerformanceCard from './PerformanceCard';
+import DepositForm from './DepositForm';
 import WithdrawalForm from './WithdrawalForm';
+import ReferralCard from './ReferralCard';
 import { useAuthData } from '@/hooks/useAuthData';
-import { useSocialMediaData } from '@/hooks/useSocialMediaData';
 import { supabase } from '@/integrations/supabase/client';
+import coinzyLogo from '@/assets/coinzy-logo.png';
 
 // Import category images
 import fitnessImage from '@/assets/fitness-category.jpg';
@@ -33,17 +28,9 @@ const Dashboard = () => {
   const [showWithdrawalForm, setShowWithdrawalForm] = useState(false);
   const { toast } = useToast();
   const { 
-    getUserDisplayName, 
-    getUserAvatar, 
-    primaryAccount,
-    getTotalFollowers,
-    getConnectedPlatforms 
-  } = useSocialMediaData();
-  
-  const { 
-    getUserDisplayName: getAuthDisplayName,
+    getUserDisplayName,
     getUserEmail,
-    getUserAvatar: getAuthAvatar,
+    getUserAvatar,
     user
   } = useAuthData();
 
@@ -110,12 +97,32 @@ const Dashboard = () => {
     }
   ];
 
-  // Get actual referral data from user profile
   const [referralData, setReferralData] = useState({
     referralCode: 'Loading...',
-    referralEarnings: 0,
+    referralEarnings: 30,
     totalReferrals: 0
   });
+
+  const [walletData, setWalletData] = useState({
+    balance: 530,
+    totalInvested: 448,
+    todayEarnings: 0,
+    todayInvestment: 0,
+    slotsBookedToday: 0
+  });
+
+  const [investmentSlots] = useState([
+    {
+      id: 1,
+      title: 'Technology Ads',
+      category: 'Tech products & software',
+      dailyRoi: 4.8,
+      performance24h: 6.09,
+      minInvestment: 499,
+      maxInvestment: 999,
+      isLive: true
+    }
+  ]);
 
   // Fetch user profile data including referral info
   useEffect(() => {
@@ -131,7 +138,7 @@ const Dashboard = () => {
           if (data && !error) {
             setReferralData({
               referralCode: data.referral_code || 'Loading...',
-              referralEarnings: data.referral_earnings || 0,
+              referralEarnings: data.referral_earnings || 30,
               totalReferrals: data.total_referrals || 0
             });
           }
