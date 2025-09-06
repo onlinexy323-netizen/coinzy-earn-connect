@@ -21,7 +21,6 @@ import ModernSidebar from './ModernSidebar';
 import { useAuthData } from '@/hooks/useAuthData';
 import { useSocialMediaData } from '@/hooks/useSocialMediaData';
 import { supabase } from '@/integrations/supabase/client';
-import coinzyLogo from '@/assets/coinzy-logo.png';
 
 // Import category images
 import fitnessImage from '@/assets/fitness-category.jpg';
@@ -36,6 +35,7 @@ const Dashboard = () => {
   const [bookedAmount, setBookedAmount] = useState<number>(0);
   const [showWithdrawalForm, setShowWithdrawalForm] = useState(false);
   const { toast } = useToast();
+  
   const { 
     getUserDisplayName,
     getUserEmail,
@@ -467,28 +467,14 @@ const Dashboard = () => {
         </div>
         
         {/* Enhanced Container */}
-        <div className="relative z-10 container mx-auto px-4 py-8 lg:ml-80 lg:pl-0 max-w-7xl">
-          <div className="min-h-[calc(100vh-8rem)]">
-            {/* Content Wrapper with Glassmorphism */}
-            <div className="relative">
-              {/* Subtle Grid Pattern */}
-              <div className="absolute inset-0 opacity-5 pointer-events-none" 
-                   style={{
-                     backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--primary)) 1px, transparent 0)`,
-                     backgroundSize: '24px 24px'
-                   }}>
-              </div>
-              
-              {/* Main Content */}
-              <div className="relative z-10 space-y-8">
-                {renderContent()}
-              </div>
-            </div>
+        <div className="relative">
+          {/* Subtle grid background */}
+          <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+          
+          <div className="container mx-auto px-4 pb-20">
+            {renderContent()}
           </div>
         </div>
-        
-        {/* Bottom Gradient Fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background via-background/50 to-transparent pointer-events-none"></div>
       </main>
 
       {/* Bottom Navigation */}
