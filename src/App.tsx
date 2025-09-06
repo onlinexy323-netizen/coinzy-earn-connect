@@ -5,11 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import LandingPage from "./components/LandingPage";
-import Dashboard from "./components/Dashboard";
+import SimpleDashboard from "./components/SimpleDashboard";
 import Auth from "./components/Auth";
-import SocialMediaConnect from "./components/SocialMediaConnect";
-import UserProfile from "./components/UserProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,26 +50,10 @@ const App = () => (
         <Routes>
           <Route path="/" element={
             <ProtectedRoute>
-              <Dashboard />
+              <SimpleDashboard />
             </ProtectedRoute>
           } />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/social-connect" element={
-            <ProtectedRoute>
-              <SocialMediaConnect onConnect={() => {}} />
-            </ProtectedRoute>
-          } />
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <UserProfile />
-            </ProtectedRoute>
-          } />
-          <Route path="/connect" element={<Auth />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
