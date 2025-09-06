@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { TrendingUp, Calendar, Target, Wallet, Eye, EyeOff } from 'lucide-react';
+import { TrendingUp, Calendar, Target, Wallet, Eye, EyeOff, Menu } from 'lucide-react';
 import BottomNavigation from './BottomNavigation';
 import InvestmentCard from './InvestmentCard';
 import WalletCard from './WalletCard';
@@ -10,7 +10,16 @@ import PerformanceCard from './PerformanceCard';
 import DepositForm from './DepositForm';
 import WithdrawalForm from './WithdrawalForm';
 import ReferralCard from './ReferralCard';
+import CountdownBanner from './CountdownBanner';
+import WalletOverviewCard from './WalletOverviewCard';
+import TodaySummaryCard from './TodaySummaryCard';
+import CategoryCard from './CategoryCard';
+import WalletOverview from './WalletOverview';
+import GrowthChart from './GrowthChart';
+import ActivityFeed from './ActivityFeed';
+import ModernSidebar from './ModernSidebar';
 import { useAuthData } from '@/hooks/useAuthData';
+import { useSocialMediaData } from '@/hooks/useSocialMediaData';
 import { supabase } from '@/integrations/supabase/client';
 import coinzyLogo from '@/assets/coinzy-logo.png';
 
@@ -34,6 +43,14 @@ const Dashboard = () => {
     user
   } = useAuthData();
 
+  const {
+    getUserDisplayName: getSocialDisplayName,
+    getUserAvatar: getSocialAvatar,
+    getTotalFollowers,
+    getConnectedPlatforms,
+    primaryAccount
+  } = useSocialMediaData();
+
   // Check if slot booking is currently active (6 PM - 8 PM)
   const isSlotActive = () => {
     const now = new Date();
@@ -43,18 +60,18 @@ const Dashboard = () => {
 
   // User data combining social media and auth data
   const userData = {
-    name: getUserDisplayName() || getAuthDisplayName(),
+    name: getUserDisplayName() || getSocialDisplayName() || 'User',
     email: getUserEmail(),
-    avatar: getUserAvatar() || getAuthAvatar(),
+    avatar: getUserAvatar() || getSocialAvatar(),
     socialStats: {
-      totalFollowers: getTotalFollowers(),
-      connectedPlatforms: getConnectedPlatforms(),
+      totalFollowers: getTotalFollowers() || 0,
+      connectedPlatforms: getConnectedPlatforms() || [],
       primaryPlatform: primaryAccount?.platform || null
     }
   };
 
   // Mock wallet data - for new users start with 0
-  const walletData = {
+  const initialWalletData = {
     totalDeposited: 0,
     totalEarnings: 0,
     totalWithdrawn: 0,
@@ -103,7 +120,7 @@ const Dashboard = () => {
     totalReferrals: 0
   });
 
-  const [walletData, setWalletData] = useState({
+  const [currentWalletData, setCurrentWalletData] = useState({
     balance: 530,
     totalInvested: 448,
     todayEarnings: 0,
@@ -250,7 +267,7 @@ const Dashboard = () => {
 
             {/* Wallet Overview */}
             <WalletOverviewCard 
-              balance={walletData.availableBalance}
+              balance={initialWalletData.availableBalance}
               onDeposit={handleDeposit}
               onWithdraw={handleWithdraw}
             />
@@ -287,9 +304,9 @@ const Dashboard = () => {
           <div className="space-y-8">
             <div className="flex items-center justify-between">
               <h2 className="text-3xl font-bold text-foreground">Your Wallet</h2>
-              <div className="text-2xl font-bold text-primary">₹{walletData.availableBalance.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-primary">₹{initialWalletData.availableBalance.toLocaleString()}</div>
             </div>
-            <WalletOverview walletData={walletData} />
+            <WalletOverview walletData={initialWalletData} />
             <GrowthChart data={chartData} />
             <ActivityFeed activities={activityData.filter(a => a.type === 'deposit' || a.type === 'withdrawal' || a.type === 'earning' || a.type === 'booking')} />
           </div>
@@ -483,7 +500,7 @@ const Dashboard = () => {
       <WithdrawalForm
         isOpen={showWithdrawalForm}
         onClose={() => setShowWithdrawalForm(false)}
-        currentBalance={walletData.availableBalance}
+        currentBalance={initialWalletData.availableBalance}
       />
     </div>
   );
